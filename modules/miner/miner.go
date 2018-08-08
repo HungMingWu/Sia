@@ -7,12 +7,12 @@ import (
 	"sync"
 	"time"
 
-	"gitlab.com/NebulousLabs/Sia/build"
-	"gitlab.com/NebulousLabs/Sia/crypto"
-	"gitlab.com/NebulousLabs/Sia/modules"
-	"gitlab.com/NebulousLabs/Sia/persist"
-	siasync "gitlab.com/NebulousLabs/Sia/sync"
-	"gitlab.com/NebulousLabs/Sia/types"
+	"github.com/HungMingWu/Sia/build"
+	"github.com/HungMingWu/Sia/crypto"
+	"github.com/HungMingWu/Sia/modules"
+	"github.com/HungMingWu/Sia/persist"
+	siasync "github.com/HungMingWu/Sia/sync"
+	"github.com/HungMingWu/Sia/types"
 )
 
 var (
@@ -135,7 +135,7 @@ func (m *Miner) startupRescan() error {
 
 	// Subscribe to the consensus set. This is a blocking call that will not
 	// return until the miner has fully caught up to the current block.
-	err = m.cs.ConsensusSetSubscribe(m, modules.ConsensusChangeBeginning, m.tg.StopChan())
+	err = m.cs.ConsensusSetSubscribe(m.tg.StopChan(), m, modules.ConsensusChangeBeginning)
 	if err != nil {
 		return err
 	}
@@ -194,7 +194,7 @@ func New(cs modules.ConsensusSet, tpool modules.TransactionPool, w modules.Walle
 		return nil, errors.New("miner persistence startup failed: " + err.Error())
 	}
 
-	err = m.cs.ConsensusSetSubscribe(m, m.persist.RecentChange, m.tg.StopChan())
+	err = m.cs.ConsensusSetSubscribe(m.tg.StopChan(), m, m.persist.RecentChange)
 	if err == modules.ErrInvalidConsensusChangeID {
 		// Perform a rescan of the consensus set if the change id is not found.
 		// The id will only be not found if there has been desynchronization

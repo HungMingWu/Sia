@@ -3,9 +3,9 @@ package renter
 import (
 	"time"
 
-	"gitlab.com/NebulousLabs/Sia/build"
-	"gitlab.com/NebulousLabs/Sia/crypto"
-	"gitlab.com/NebulousLabs/Sia/modules"
+	"github.com/HungMingWu/Sia/build"
+	"github.com/HungMingWu/Sia/crypto"
+	"github.com/HungMingWu/Sia/modules"
 )
 
 var (

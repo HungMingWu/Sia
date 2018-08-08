@@ -3,8 +3,8 @@ package consensus
 import (
 	"sort"
 
-	"gitlab.com/NebulousLabs/Sia/encoding"
-	"gitlab.com/NebulousLabs/Sia/types"
+	"github.com/HungMingWu/Sia/encoding"
+	"github.com/HungMingWu/Sia/types"
 )
 
 // blockRuleHelper assists with block validity checks by calculating values

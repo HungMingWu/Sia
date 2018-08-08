@@ -13,8 +13,8 @@ import (
 	"gitlab.com/NebulousLabs/errors"
 	"gitlab.com/NebulousLabs/go-upnp"
 
-	"gitlab.com/NebulousLabs/Sia/build"
-	"gitlab.com/NebulousLabs/Sia/modules"
+	"github.com/HungMingWu/Sia/build"
+	"github.com/HungMingWu/Sia/modules"
 )
 
 // myExternalIP discovers the gateway's external IP by querying a centralized
@@ -44,15 +44,15 @@ func myExternalIP() (string, error) {
 
 // managedLearnHostname tries to discover the external ip of the machine. If
 // discovering the address failed or if it is invalid, an error is returned.
-func (g *Gateway) managedLearnHostname(cancel <-chan struct{}) (modules.NetAddress, error) {
+func (g *Gateway) managedLearnHostname(cancel context.Context) (modules.NetAddress, error) {
 	// create ctx to cancel upnp discovery during shutdown
 	ctx, ctxCancel := context.WithTimeout(context.Background(), timeoutIPDiscovery)
 	defer ctxCancel()
 	go func() {
 		select {
-		case <-cancel:
+		case <-cancel.Done():
 			ctxCancel()
-		case <-g.threads.StopChan():
+		case <-g.threads.StopChan().Done():
 			ctxCancel()
 		case <-ctx.Done():
 		}
@@ -143,7 +143,7 @@ func (g *Gateway) threadedForwardPort(port string) {
 	defer cancel()
 	go func() {
 		select {
-		case <-g.threads.StopChan():
+		case <-g.threads.StopChan().Done():
 			cancel()
 		case <-ctx.Done():
 		}
@@ -179,7 +179,7 @@ func (g *Gateway) managedClearPort(port string) {
 	defer cancel()
 	go func() {
 		select {
-		case <-g.threads.StopChan():
+		case <-g.threads.StopChan().Done():
 			cancel()
 		case <-ctx.Done():
 		}

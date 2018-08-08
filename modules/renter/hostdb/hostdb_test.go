@@ -8,17 +8,17 @@ import (
 	"testing"
 	"time"
 
-	"gitlab.com/NebulousLabs/Sia/build"
-	"gitlab.com/NebulousLabs/Sia/crypto"
-	"gitlab.com/NebulousLabs/Sia/modules"
-	"gitlab.com/NebulousLabs/Sia/modules/consensus"
-	"gitlab.com/NebulousLabs/Sia/modules/gateway"
-	"gitlab.com/NebulousLabs/Sia/modules/miner"
-	"gitlab.com/NebulousLabs/Sia/modules/renter/hostdb/hosttree"
-	"gitlab.com/NebulousLabs/Sia/modules/transactionpool"
-	"gitlab.com/NebulousLabs/Sia/modules/wallet"
-	"gitlab.com/NebulousLabs/Sia/persist"
-	"gitlab.com/NebulousLabs/Sia/types"
+	"github.com/HungMingWu/Sia/build"
+	"github.com/HungMingWu/Sia/crypto"
+	"github.com/HungMingWu/Sia/modules"
+	"github.com/HungMingWu/Sia/modules/consensus"
+	"github.com/HungMingWu/Sia/modules/gateway"
+	"github.com/HungMingWu/Sia/modules/miner"
+	"github.com/HungMingWu/Sia/modules/renter/hostdb/hosttree"
+	"github.com/HungMingWu/Sia/modules/transactionpool"
+	"github.com/HungMingWu/Sia/modules/wallet"
+	"github.com/HungMingWu/Sia/persist"
+	"github.com/HungMingWu/Sia/types"
 )
 
 // hdbTester contains a hostdb and all dependencies.

@@ -5,8 +5,8 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"gitlab.com/NebulousLabs/Sia/build"
-	"gitlab.com/NebulousLabs/Sia/modules"
+	"github.com/HungMingWu/Sia/build"
+	"github.com/HungMingWu/Sia/modules"
 )
 
 type (

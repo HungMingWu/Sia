@@ -7,8 +7,8 @@ import (
 	"sync"
 	"testing"
 
-	"gitlab.com/NebulousLabs/Sia/crypto"
-	"gitlab.com/NebulousLabs/Sia/modules"
+	"github.com/HungMingWu/Sia/crypto"
+	"github.com/HungMingWu/Sia/modules"
 )
 
 // TestRemoveStorageFolder tries removing a storage folder that has no sectors

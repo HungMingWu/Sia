@@ -6,10 +6,10 @@ import (
 	"path/filepath"
 	"time"
 
-	"gitlab.com/NebulousLabs/Sia/build"
-	"gitlab.com/NebulousLabs/Sia/modules"
-	"gitlab.com/NebulousLabs/Sia/persist"
-	"gitlab.com/NebulousLabs/Sia/types"
+	"github.com/HungMingWu/Sia/build"
+	"github.com/HungMingWu/Sia/modules"
+	"github.com/HungMingWu/Sia/persist"
+	"github.com/HungMingWu/Sia/types"
 
 	"github.com/coreos/bbolt"
 	"gitlab.com/NebulousLabs/errors"
@@ -26,7 +26,7 @@ func (tp *TransactionPool) threadedRegularSync() {
 	defer tp.tg.Done()
 	for {
 		select {
-		case <-tp.tg.StopChan():
+		case <-tp.tg.StopChan().Done():
 			// A queued AfterStop will close out the db properly.
 			return
 		case <-time.After(tpoolSyncRate):
@@ -177,7 +177,7 @@ func (tp *TransactionPool) initPersist() error {
 	}
 
 	// Subscribe to the consensus set using the most recent consensus change.
-	err = tp.consensusSet.ConsensusSetSubscribe(tp, cc, tp.tg.StopChan())
+	err = tp.consensusSet.ConsensusSetSubscribe(tp.tg.StopChan(), tp, cc)
 	if err == modules.ErrInvalidConsensusChangeID {
 		tp.log.Println("Invalid consensus change loaded; resetting. This can take a while.")
 		// Reset and rescan because the consensus set does not recognize the
@@ -186,7 +186,7 @@ func (tp *TransactionPool) initPersist() error {
 		if resetErr != nil {
 			return resetErr
 		}
-		freshScanErr := tp.consensusSet.ConsensusSetSubscribe(tp, modules.ConsensusChangeBeginning, tp.tg.StopChan())
+		freshScanErr := tp.consensusSet.ConsensusSetSubscribe(tp.tg.StopChan(), tp, modules.ConsensusChangeBeginning)
 		if freshScanErr != nil {
 			return freshScanErr
 		}

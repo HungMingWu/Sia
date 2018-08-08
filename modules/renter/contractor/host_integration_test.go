@@ -9,18 +9,18 @@ import (
 	"testing"
 	"time"
 
-	"gitlab.com/NebulousLabs/Sia/build"
-	"gitlab.com/NebulousLabs/Sia/crypto"
-	"gitlab.com/NebulousLabs/Sia/encoding"
-	"gitlab.com/NebulousLabs/Sia/modules"
-	"gitlab.com/NebulousLabs/Sia/modules/consensus"
-	"gitlab.com/NebulousLabs/Sia/modules/gateway"
-	"gitlab.com/NebulousLabs/Sia/modules/host"
-	"gitlab.com/NebulousLabs/Sia/modules/miner"
-	"gitlab.com/NebulousLabs/Sia/modules/renter/hostdb"
-	"gitlab.com/NebulousLabs/Sia/modules/transactionpool"
-	modWallet "gitlab.com/NebulousLabs/Sia/modules/wallet"
-	"gitlab.com/NebulousLabs/Sia/types"
+	"github.com/HungMingWu/Sia/build"
+	"github.com/HungMingWu/Sia/crypto"
+	"github.com/HungMingWu/Sia/encoding"
+	"github.com/HungMingWu/Sia/modules"
+	"github.com/HungMingWu/Sia/modules/consensus"
+	"github.com/HungMingWu/Sia/modules/gateway"
+	"github.com/HungMingWu/Sia/modules/host"
+	"github.com/HungMingWu/Sia/modules/miner"
+	"github.com/HungMingWu/Sia/modules/renter/hostdb"
+	"github.com/HungMingWu/Sia/modules/transactionpool"
+	modWallet "github.com/HungMingWu/Sia/modules/wallet"
+	"github.com/HungMingWu/Sia/types"
 	"gitlab.com/NebulousLabs/fastrand"
 )
 
@@ -241,7 +241,7 @@ func TestIntegrationReviseContract(t *testing.T) {
 	}
 
 	// revise the contract
-	editor, err := c.Editor(contract.HostPublicKey, nil)
+	editor, err := c.Editor(nil, contract.HostPublicKey)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -284,7 +284,7 @@ func TestIntegrationUploadDownload(t *testing.T) {
 	}
 
 	// revise the contract
-	editor, err := c.Editor(contract.HostPublicKey, nil)
+	editor, err := c.Editor(nil, contract.HostPublicKey)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -299,7 +299,7 @@ func TestIntegrationUploadDownload(t *testing.T) {
 	}
 
 	// download the data
-	downloader, err := c.Downloader(contract.HostPublicKey, nil)
+	downloader, err := c.Downloader(nil, contract.HostPublicKey)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -344,7 +344,7 @@ func TestIntegrationRenew(t *testing.T) {
 	}
 
 	// revise the contract
-	editor, err := c.Editor(contract.HostPublicKey, nil)
+	editor, err := c.Editor(nil, contract.HostPublicKey)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -380,7 +380,7 @@ func TestIntegrationRenew(t *testing.T) {
 	}
 
 	// download the renewed contract
-	downloader, err := c.Downloader(contract.HostPublicKey, nil)
+	downloader, err := c.Downloader(nil, contract.HostPublicKey)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -412,7 +412,7 @@ func TestIntegrationRenew(t *testing.T) {
 	}
 
 	// revise the contract
-	editor, err = c.Editor(contract.HostPublicKey, nil)
+	editor, err = c.Editor(nil, contract.HostPublicKey)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -457,13 +457,13 @@ func TestIntegrationDownloaderCaching(t *testing.T) {
 	}
 
 	// create a downloader
-	d1, err := c.Downloader(contract.HostPublicKey, nil)
+	d1, err := c.Downloader(nil, contract.HostPublicKey)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	// create another downloader
-	d2, err := c.Downloader(contract.HostPublicKey, nil)
+	d2, err := c.Downloader(nil, contract.HostPublicKey)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -485,7 +485,7 @@ func TestIntegrationDownloaderCaching(t *testing.T) {
 	}
 
 	// create another downloader
-	d3, err := c.Downloader(contract.HostPublicKey, nil)
+	d3, err := c.Downloader(nil, contract.HostPublicKey)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -507,7 +507,7 @@ func TestIntegrationDownloaderCaching(t *testing.T) {
 	}
 
 	// create another downloader
-	d4, err := c.Downloader(contract.HostPublicKey, nil)
+	d4, err := c.Downloader(nil, contract.HostPublicKey)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -548,13 +548,13 @@ func TestIntegrationEditorCaching(t *testing.T) {
 	}
 
 	// create an editor
-	d1, err := c.Editor(contract.HostPublicKey, nil)
+	d1, err := c.Editor(nil, contract.HostPublicKey)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	// create another editor
-	d2, err := c.Editor(contract.HostPublicKey, nil)
+	d2, err := c.Editor(nil, contract.HostPublicKey)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -576,7 +576,7 @@ func TestIntegrationEditorCaching(t *testing.T) {
 	}
 
 	// create another editor
-	d3, err := c.Editor(contract.HostPublicKey, nil)
+	d3, err := c.Editor(nil, contract.HostPublicKey)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -598,7 +598,7 @@ func TestIntegrationEditorCaching(t *testing.T) {
 	}
 
 	// create another editor
-	d4, err := c.Editor(contract.HostPublicKey, nil)
+	d4, err := c.Editor(nil, contract.HostPublicKey)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -612,7 +612,7 @@ func TestIntegrationEditorCaching(t *testing.T) {
 
 // TestContractPresenceLeak tests that a renter can not tell from the response
 // of the host to RPCs if the host has the contract if the renter doesn't
-// own this contract. See https://gitlab.com/NebulousLabs/Sia/issues/2327.
+// own this contract. See https://github.com/HungMingWu/Sia/issues/2327.
 func TestContractPresenceLeak(t *testing.T) {
 	if testing.Short() {
 		t.SkipNow()

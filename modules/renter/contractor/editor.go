@@ -3,11 +3,12 @@ package contractor
 import (
 	"errors"
 	"sync"
+	"context"
 
-	"gitlab.com/NebulousLabs/Sia/crypto"
-	"gitlab.com/NebulousLabs/Sia/modules"
-	"gitlab.com/NebulousLabs/Sia/modules/renter/proto"
-	"gitlab.com/NebulousLabs/Sia/types"
+	"github.com/HungMingWu/Sia/crypto"
+	"github.com/HungMingWu/Sia/modules"
+	"github.com/HungMingWu/Sia/modules/renter/proto"
+	"github.com/HungMingWu/Sia/types"
 )
 
 var errInvalidEditor = errors.New("editor has been invalidated because its contract is being renewed")
@@ -115,7 +116,7 @@ func (he *hostEditor) Upload(data []byte) (_ crypto.Hash, err error) {
 
 // Editor returns a Editor object that can be used to upload, modify, and
 // delete sectors on a host.
-func (c *Contractor) Editor(pk types.SiaPublicKey, cancel <-chan struct{}) (_ Editor, err error) {
+func (c *Contractor) Editor(ctx context.Context, pk types.SiaPublicKey) (_ Editor, err error) {
 	c.mu.RLock()
 	id, gotID := c.pubKeysToContractID[string(pk.Key)]
 	cachedEditor, haveEditor := c.editors[id]
@@ -173,7 +174,7 @@ func (c *Contractor) Editor(pk types.SiaPublicKey, cancel <-chan struct{}) (_ Ed
 	}()
 
 	// Create the editor.
-	e, err := c.staticContracts.NewEditor(host, contract.ID, height, c.hdb, cancel)
+	e, err := c.staticContracts.NewEditor(ctx, host, contract.ID, height, c.hdb)
 	if err != nil {
 		return nil, err
 	}

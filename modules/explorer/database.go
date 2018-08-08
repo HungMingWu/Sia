@@ -3,8 +3,8 @@ package explorer
 import (
 	"errors"
 
-	"gitlab.com/NebulousLabs/Sia/encoding"
-	"gitlab.com/NebulousLabs/Sia/types"
+	"github.com/HungMingWu/Sia/encoding"
+	"github.com/HungMingWu/Sia/types"
 
 	"github.com/coreos/bbolt"
 )

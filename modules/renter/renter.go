@@ -25,16 +25,17 @@ import (
 	"reflect"
 	"strings"
 	"sync"
+	"context"
 
-	"gitlab.com/NebulousLabs/Sia/build"
-	"gitlab.com/NebulousLabs/Sia/modules"
-	"gitlab.com/NebulousLabs/Sia/modules/renter/contractor"
-	"gitlab.com/NebulousLabs/Sia/modules/renter/hostdb"
-	"gitlab.com/NebulousLabs/Sia/persist"
-	siasync "gitlab.com/NebulousLabs/Sia/sync"
-	"gitlab.com/NebulousLabs/Sia/types"
+	"github.com/HungMingWu/Sia/build"
+	"github.com/HungMingWu/Sia/modules"
+	"github.com/HungMingWu/Sia/modules/renter/contractor"
+	"github.com/HungMingWu/Sia/modules/renter/hostdb"
+	"github.com/HungMingWu/Sia/persist"
+	siasync "github.com/HungMingWu/Sia/sync"
+	"github.com/HungMingWu/Sia/types"
 
-	"gitlab.com/NebulousLabs/threadgroup"
+	"github.com/HungMingWu/threadgroup"
 )
 
 var (
@@ -133,14 +134,14 @@ type hostContractor interface {
 
 	// Editor creates an Editor from the specified contract ID, allowing the
 	// insertion, deletion, and modification of sectors.
-	Editor(types.SiaPublicKey, <-chan struct{}) (contractor.Editor, error)
+	Editor(context.Context, types.SiaPublicKey) (contractor.Editor, error)
 
 	// IsOffline reports whether the specified host is considered offline.
 	IsOffline(types.SiaPublicKey) bool
 
 	// Downloader creates a Downloader from the specified contract ID,
 	// allowing the retrieval of sectors.
-	Downloader(types.SiaPublicKey, <-chan struct{}) (contractor.Downloader, error)
+	Downloader(context.Context, types.SiaPublicKey) (contractor.Downloader, error)
 
 	// ResolveIDToPubKey returns the public key of a host given a contract id.
 	ResolveIDToPubKey(types.FileContractID) types.SiaPublicKey
@@ -505,7 +506,7 @@ func NewCustomRenter(g modules.Gateway, cs modules.ConsensusSet, tpool modules.T
 		mu:             siasync.New(modules.SafeMutexDelay, 1),
 		tpool:          tpool,
 	}
-	r.memoryManager = newMemoryManager(defaultMemory, r.tg.StopChan())
+	r.memoryManager = newMemoryManager(r.tg.StopChan(), defaultMemory)
 
 	// Load all saved data.
 	if err := r.initPersist(); err != nil {
@@ -526,7 +527,7 @@ func NewCustomRenter(g modules.Gateway, cs modules.ConsensusSet, tpool modules.T
 	r.staticStreamCache = newStreamCache(r.persist.StreamCacheSize)
 
 	// Subscribe to the consensus set.
-	err = cs.ConsensusSetSubscribe(r, modules.ConsensusChangeRecent, r.tg.StopChan())
+	err = cs.ConsensusSetSubscribe(r.tg.StopChan(), r, modules.ConsensusChangeRecent)
 	if err != nil {
 		return nil, err
 	}

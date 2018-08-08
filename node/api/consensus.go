@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"gitlab.com/NebulousLabs/Sia/crypto"
-	"gitlab.com/NebulousLabs/Sia/types"
+	"github.com/HungMingWu/Sia/crypto"
+	"github.com/HungMingWu/Sia/types"
 
 	"github.com/julienschmidt/httprouter"
 )

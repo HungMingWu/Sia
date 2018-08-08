@@ -9,10 +9,10 @@ import (
 	"sort"
 	"time"
 
-	"gitlab.com/NebulousLabs/Sia/build"
-	"gitlab.com/NebulousLabs/Sia/crypto"
-	"gitlab.com/NebulousLabs/Sia/encoding"
-	"gitlab.com/NebulousLabs/Sia/modules"
+	"github.com/HungMingWu/Sia/build"
+	"github.com/HungMingWu/Sia/crypto"
+	"github.com/HungMingWu/Sia/encoding"
+	"github.com/HungMingWu/Sia/modules"
 	"gitlab.com/NebulousLabs/fastrand"
 )
 
@@ -128,7 +128,7 @@ func (hdb *HostDB) queueScan(entry modules.HostDBEntry) {
 			select {
 			case scanPool <- entry:
 				// iterate again
-			case <-hdb.tg.StopChan():
+			case <-hdb.tg.StopChan().Done():
 				// quit
 				return
 			}
@@ -284,12 +284,10 @@ func (hdb *HostDB) managedScanHost(entry modules.HostDBEntry) {
 		}
 		hdb.mu.RUnlock()
 
-		dialer := &net.Dialer{
-			Cancel:  hdb.tg.StopChan(),
+	        conn, err := (&net.Dialer{
 			Timeout: timeout,
-		}
+		}).DialContext(hdb.tg.StopChan(), "tcp", string(netAddr))
 		start := time.Now()
-		conn, err := dialer.Dial("tcp", string(netAddr))
 		latency = time.Since(start)
 		if err != nil {
 			return err
@@ -297,7 +295,7 @@ func (hdb *HostDB) managedScanHost(entry modules.HostDBEntry) {
 		connCloseChan := make(chan struct{})
 		go func() {
 			select {
-			case <-hdb.tg.StopChan():
+			case <-hdb.tg.StopChan().Done():
 			case <-connCloseChan:
 			}
 			conn.Close()
@@ -351,7 +349,7 @@ func (hdb *HostDB) managedWaitForScans() {
 			break
 		}
 		select {
-		case <-hdb.tg.StopChan():
+		case <-hdb.tg.StopChan().Done():
 		case <-time.After(scanCheckInterval):
 		}
 	}
@@ -371,7 +369,7 @@ func (hdb *HostDB) threadedProbeHosts(scanPool <-chan modules.HostDBEntry) {
 			select {
 			case <-time.After(time.Second * 30):
 				continue
-			case <-hdb.tg.StopChan():
+			case <-hdb.tg.StopChan().Done():
 				return
 			}
 		}
@@ -398,7 +396,7 @@ func (hdb *HostDB) threadedScan() {
 			break
 		}
 		select {
-		case <-hdb.tg.StopChan():
+		case <-hdb.tg.StopChan().Done():
 			return
 		case <-time.After(scanCheckInterval):
 		}
@@ -471,7 +469,7 @@ func (hdb *HostDB) threadedScan() {
 
 		// Sleep until it's time for the next scan cycle.
 		select {
-		case <-hdb.tg.StopChan():
+		case <-hdb.tg.StopChan().Done():
 			return
 		case <-time.After(sleepTime):
 		}

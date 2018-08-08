@@ -8,12 +8,12 @@ import (
 	"sync"
 	"time"
 
-	"gitlab.com/NebulousLabs/Sia/build"
-	"gitlab.com/NebulousLabs/Sia/modules"
-	"gitlab.com/NebulousLabs/Sia/node"
-	"gitlab.com/NebulousLabs/Sia/node/api/client"
-	"gitlab.com/NebulousLabs/Sia/persist"
-	"gitlab.com/NebulousLabs/Sia/types"
+	"github.com/HungMingWu/Sia/build"
+	"github.com/HungMingWu/Sia/modules"
+	"github.com/HungMingWu/Sia/node"
+	"github.com/HungMingWu/Sia/node/api/client"
+	"github.com/HungMingWu/Sia/persist"
+	"github.com/HungMingWu/Sia/types"
 	"gitlab.com/NebulousLabs/errors"
 )
 

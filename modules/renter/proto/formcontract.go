@@ -2,11 +2,12 @@ package proto
 
 import (
 	"net"
+	"context"
 
-	"gitlab.com/NebulousLabs/Sia/crypto"
-	"gitlab.com/NebulousLabs/Sia/encoding"
-	"gitlab.com/NebulousLabs/Sia/modules"
-	"gitlab.com/NebulousLabs/Sia/types"
+	"github.com/HungMingWu/Sia/crypto"
+	"github.com/HungMingWu/Sia/encoding"
+	"github.com/HungMingWu/Sia/modules"
+	"github.com/HungMingWu/Sia/types"
 
 	"gitlab.com/NebulousLabs/errors"
 )
@@ -14,7 +15,7 @@ import (
 // FormContract forms a contract with a host and submits the contract
 // transaction to tpool. The contract is added to the ContractSet and its
 // metadata is returned.
-func (cs *ContractSet) FormContract(params ContractParams, txnBuilder transactionBuilder, tpool transactionPool, hdb hostDB, cancel <-chan struct{}) (rc modules.RenterContract, err error) {
+func (cs *ContractSet) FormContract(cancel context.Context, params ContractParams, txnBuilder transactionBuilder, tpool transactionPool, hdb hostDB) (rc modules.RenterContract, err error) {
 	// Extract vars from params, for convenience.
 	host, funding, startHeight, endHeight, refundAddress := params.Host, params.Funding, params.StartHeight, params.EndHeight, params.RefundAddress
 
@@ -110,11 +111,9 @@ func (cs *ContractSet) FormContract(params ContractParams, txnBuilder transactio
 	}()
 
 	// Initiate connection.
-	dialer := &net.Dialer{
-		Cancel:  cancel,
+	conn, err := (&net.Dialer{
 		Timeout: connTimeout,
-	}
-	conn, err := dialer.Dial("tcp", string(host.NetAddress))
+	}).DialContext(cancel, "tcp", string(host.NetAddress))
 	if err != nil {
 		return modules.RenterContract{}, err
 	}

@@ -3,8 +3,8 @@ package contractmanager
 import (
 	"time"
 
-	"gitlab.com/NebulousLabs/Sia/build"
-	"gitlab.com/NebulousLabs/Sia/persist"
+	"github.com/HungMingWu/Sia/build"
+	"github.com/HungMingWu/Sia/persist"
 )
 
 const (

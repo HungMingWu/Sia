@@ -3,8 +3,8 @@ package explorer
 import (
 	"testing"
 
-	"gitlab.com/NebulousLabs/Sia/crypto"
-	"gitlab.com/NebulousLabs/Sia/types"
+	"github.com/HungMingWu/Sia/crypto"
+	"github.com/HungMingWu/Sia/types"
 	"gitlab.com/NebulousLabs/fastrand"
 )
 

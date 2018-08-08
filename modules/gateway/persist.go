@@ -4,8 +4,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"gitlab.com/NebulousLabs/Sia/modules"
-	"gitlab.com/NebulousLabs/Sia/persist"
+	"github.com/HungMingWu/Sia/modules"
+	"github.com/HungMingWu/Sia/persist"
 )
 
 const (
@@ -55,7 +55,7 @@ func (g *Gateway) saveSync() error {
 func (g *Gateway) threadedSaveLoop() {
 	for {
 		select {
-		case <-g.threads.StopChan():
+		case <-g.threads.StopChan().Done():
 			return
 		case <-time.After(saveFrequency):
 		}

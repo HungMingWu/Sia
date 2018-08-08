@@ -10,8 +10,8 @@ import (
 	"bytes"
 	"errors"
 
-	"gitlab.com/NebulousLabs/Sia/crypto"
-	"gitlab.com/NebulousLabs/Sia/encoding"
+	"github.com/HungMingWu/Sia/crypto"
+	"github.com/HungMingWu/Sia/encoding"
 )
 
 var (

@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"sort"
 
-	"gitlab.com/NebulousLabs/Sia/crypto"
-	"gitlab.com/NebulousLabs/Sia/modules"
-	"gitlab.com/NebulousLabs/Sia/types"
+	"github.com/HungMingWu/Sia/crypto"
+	"github.com/HungMingWu/Sia/modules"
+	"github.com/HungMingWu/Sia/types"
 )
 
 // findSets takes a bunch of transactions (presumably from a block) and finds

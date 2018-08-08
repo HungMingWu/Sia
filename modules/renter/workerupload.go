@@ -3,7 +3,7 @@ package renter
 import (
 	"time"
 
-	"gitlab.com/NebulousLabs/Sia/build"
+	"github.com/HungMingWu/Sia/build"
 )
 
 // managedDropChunk will remove a worker from the responsibility of tracking a chunk.
@@ -98,7 +98,7 @@ func (w *worker) managedQueueUploadChunk(uc *unfinishedUploadChunk) {
 // managedUpload will perform some upload work.
 func (w *worker) managedUpload(uc *unfinishedUploadChunk, pieceIndex uint64) {
 	// Open an editing connection to the host.
-	e, err := w.renter.hostContractor.Editor(w.contract.HostPublicKey, w.renter.tg.StopChan())
+	e, err := w.renter.hostContractor.Editor(w.renter.tg.StopChan(), w.contract.HostPublicKey)
 	if err != nil {
 		w.renter.log.Debugln("Worker failed to acquire an editor:", err)
 		w.managedUploadFailed(uc, pieceIndex)

@@ -102,7 +102,7 @@ func (s *streamer) Read(p []byte) (n int, err error) {
 		if d.Err() != nil {
 			return 0, errors.AddContext(d.Err(), "download failed")
 		}
-	case <-s.r.tg.StopChan():
+	case <-s.r.tg.StopChan().Done():
 		return 0, errors.New("download interrupted by shutdown")
 	}
 

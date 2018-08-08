@@ -10,11 +10,11 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"gitlab.com/NebulousLabs/Sia/build"
-	"gitlab.com/NebulousLabs/Sia/encoding"
-	"gitlab.com/NebulousLabs/Sia/modules"
-	"gitlab.com/NebulousLabs/Sia/persist"
-	"gitlab.com/NebulousLabs/Sia/types"
+	"github.com/HungMingWu/Sia/build"
+	"github.com/HungMingWu/Sia/encoding"
+	"github.com/HungMingWu/Sia/modules"
+	"github.com/HungMingWu/Sia/persist"
+	"github.com/HungMingWu/Sia/types"
 )
 
 const (

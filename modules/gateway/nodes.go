@@ -6,10 +6,10 @@ import (
 	"net"
 	"time"
 
-	"gitlab.com/NebulousLabs/Sia/build"
-	"gitlab.com/NebulousLabs/Sia/encoding"
-	"gitlab.com/NebulousLabs/Sia/modules"
-	"gitlab.com/NebulousLabs/Sia/types"
+	"github.com/HungMingWu/Sia/build"
+	"github.com/HungMingWu/Sia/encoding"
+	"github.com/HungMingWu/Sia/modules"
+	"github.com/HungMingWu/Sia/types"
 	"gitlab.com/NebulousLabs/fastrand"
 )
 
@@ -226,7 +226,7 @@ func (g *Gateway) permanentNodePurger(closeChan chan struct{}) {
 		// Sleep as a purge ratelimit.
 		select {
 		case <-time.After(waitTime):
-		case <-g.threads.StopChan():
+		case <-g.threads.StopChan().Done():
 			// The gateway is shutting down, close out the thread.
 			return
 		}
@@ -291,7 +291,7 @@ func (g *Gateway) permanentNodeManager(closeChan chan struct{}) {
 		// to peers.
 		select {
 		case <-time.After(nodeListDelay):
-		case <-g.threads.StopChan():
+		case <-g.threads.StopChan().Done():
 			// Gateway is shutting down, close the thread.
 			return
 		}
@@ -323,7 +323,7 @@ func (g *Gateway) permanentNodeManager(closeChan chan struct{}) {
 			// every 5 seconds. Wait a while before checking again.
 			select {
 			case <-time.After(wellConnectedDelay):
-			case <-g.threads.StopChan():
+			case <-g.threads.StopChan().Done():
 				// Gateway is shutting down, close the thread.
 				return
 			}

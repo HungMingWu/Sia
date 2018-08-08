@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"gitlab.com/NebulousLabs/Sia/modules"
-	"gitlab.com/NebulousLabs/Sia/node/api"
+	"github.com/HungMingWu/Sia/modules"
+	"github.com/HungMingWu/Sia/node/api"
 )
 
 // RenterContractsGet requests the /renter/contracts resource and returns

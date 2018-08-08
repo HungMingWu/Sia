@@ -5,10 +5,11 @@ import (
 	"os"
 	"testing"
 	"time"
+	"context"
 
-	"gitlab.com/NebulousLabs/Sia/build"
-	"gitlab.com/NebulousLabs/Sia/modules"
-	"gitlab.com/NebulousLabs/Sia/types"
+	"github.com/HungMingWu/Sia/build"
+	"github.com/HungMingWu/Sia/modules"
+	"github.com/HungMingWu/Sia/types"
 )
 
 // newStub is used to test the New function. It implements all of the contractor's
@@ -16,7 +17,7 @@ import (
 type newStub struct{}
 
 // consensus set stubs
-func (newStub) ConsensusSetSubscribe(modules.ConsensusSetSubscriber, modules.ConsensusChangeID, <-chan struct{}) error {
+func (newStub) ConsensusSetSubscribe(context.Context, modules.ConsensusSetSubscriber, modules.ConsensusChangeID) error {
 	return nil
 }
 func (newStub) Synced() bool                               { return true }
@@ -185,7 +186,7 @@ func TestAllowanceSpending(t *testing.T) {
 	// allowance.
 	for i := 0; i < 15; i++ {
 		for _, contract := range c.Contracts() {
-			ed, err := c.Editor(contract.HostPublicKey, nil)
+			ed, err := c.Editor(nil, contract.HostPublicKey)
 			if err != nil {
 				continue
 			}

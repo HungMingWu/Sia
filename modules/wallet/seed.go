@@ -5,10 +5,10 @@ import (
 	"sync"
 
 	"github.com/coreos/bbolt"
-	"gitlab.com/NebulousLabs/Sia/crypto"
-	"gitlab.com/NebulousLabs/Sia/encoding"
-	"gitlab.com/NebulousLabs/Sia/modules"
-	"gitlab.com/NebulousLabs/Sia/types"
+	"github.com/HungMingWu/Sia/crypto"
+	"github.com/HungMingWu/Sia/encoding"
+	"github.com/HungMingWu/Sia/modules"
+	"github.com/HungMingWu/Sia/types"
 	"gitlab.com/NebulousLabs/errors"
 	"gitlab.com/NebulousLabs/fastrand"
 )
@@ -256,7 +256,7 @@ func (w *Wallet) LoadSeed(masterKey crypto.TwofishKey, seed modules.Seed) error 
 
 	// scan blockchain to determine how many keys to generate for the seed
 	s := newSeedScanner(seed, w.log)
-	if err := s.scan(w.cs, w.tg.StopChan()); err != nil {
+	if err := s.scan(w.tg.StopChan(), w.cs); err != nil {
 		return err
 	}
 	// Add 4% as a buffer because the seed may have addresses in the wild
@@ -321,7 +321,7 @@ func (w *Wallet) LoadSeed(masterKey crypto.TwofishKey, seed modules.Seed) error 
 	go w.rescanMessage(done)
 	defer close(done)
 
-	err = w.cs.ConsensusSetSubscribe(w, modules.ConsensusChangeBeginning, w.tg.StopChan())
+	err = w.cs.ConsensusSetSubscribe(w.tg.StopChan(), w, modules.ConsensusChangeBeginning)
 	if err != nil {
 		return err
 	}
@@ -370,7 +370,7 @@ func (w *Wallet) SweepSeed(seed modules.Seed) (coins, funds types.Currency, err 
 	const outputSize = 350 // approx. size in bytes of an output and accompanying signature
 	const maxOutputs = 50  // approx. number of outputs that a transaction can handle
 	s.dustThreshold = maxFee.Mul64(outputSize)
-	if err = s.scan(w.cs, w.tg.StopChan()); err != nil {
+	if err = s.scan(w.tg.StopChan(), w.cs); err != nil {
 		return
 	}
 

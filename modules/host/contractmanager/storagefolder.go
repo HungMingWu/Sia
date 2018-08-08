@@ -9,8 +9,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"gitlab.com/NebulousLabs/Sia/modules"
-	"gitlab.com/NebulousLabs/Sia/sync"
+	"github.com/HungMingWu/Sia/modules"
+	"github.com/HungMingWu/Sia/sync"
 	"gitlab.com/NebulousLabs/fastrand"
 )
 
@@ -293,7 +293,7 @@ func (cm *ContractManager) threadedFolderRecheck() {
 	for {
 		// Check for shutdown.
 		select {
-		case <-cm.tg.StopChan():
+		case <-cm.tg.StopChan().Done():
 			return
 		case <-time.After(sleepTime):
 		}

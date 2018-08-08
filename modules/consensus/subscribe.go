@@ -3,12 +3,13 @@ package consensus
 import (
 	"errors"
 	"time"
+	"context"
 
-	"gitlab.com/NebulousLabs/Sia/build"
-	"gitlab.com/NebulousLabs/Sia/modules"
+	"github.com/HungMingWu/Sia/build"
+	"github.com/HungMingWu/Sia/modules"
 
 	"github.com/coreos/bbolt"
-	siasync "gitlab.com/NebulousLabs/Sia/sync"
+	siasync "github.com/HungMingWu/Sia/sync"
 )
 
 // computeConsensusChange computes the consensus change from the change entry
@@ -127,8 +128,8 @@ func (cs *ConsensusSet) updateSubscribers(ce changeEntry) {
 //
 // As a special case, using an empty id as the start will have all the changes
 // sent to the modules starting with the genesis block.
-func (cs *ConsensusSet) managedInitializeSubscribe(subscriber modules.ConsensusSetSubscriber, start modules.ConsensusChangeID,
-	cancel <-chan struct{}) (modules.ConsensusChangeID, error) {
+func (cs *ConsensusSet) managedInitializeSubscribe(cancel context.Context, subscriber modules.ConsensusSetSubscriber, start modules.ConsensusChangeID,
+	) (modules.ConsensusChangeID, error) {
 
 	if start == modules.ConsensusChangeRecent {
 		cs.mu.Lock()
@@ -187,7 +188,7 @@ func (cs *ConsensusSet) managedInitializeSubscribe(subscriber modules.ConsensusS
 			for i := 0; i < 100 && exists; i++ {
 				latestChangeID = entry.ID()
 				select {
-				case <-cancel:
+				case <-cancel.Done():
 					return siasync.ErrStopped
 				default:
 				}
@@ -229,8 +230,7 @@ func (cs *ConsensusSet) recentConsensusChangeID() (cid modules.ConsensusChangeID
 //
 // As a special case, using an empty id as the start will have all the changes
 // sent to the modules starting with the genesis block.
-func (cs *ConsensusSet) ConsensusSetSubscribe(subscriber modules.ConsensusSetSubscriber, start modules.ConsensusChangeID,
-	cancel <-chan struct{}) error {
+func (cs *ConsensusSet) ConsensusSetSubscribe(cancel context.Context, subscriber modules.ConsensusSetSubscriber, start modules.ConsensusChangeID) error {
 
 	err := cs.tg.Add()
 	if err != nil {
@@ -240,7 +240,7 @@ func (cs *ConsensusSet) ConsensusSetSubscribe(subscriber modules.ConsensusSetSub
 
 	// Call managedInitializeSubscribe until the new module is up-to-date.
 	for {
-		start, err = cs.managedInitializeSubscribe(subscriber, start, cancel)
+		start, err = cs.managedInitializeSubscribe(cancel, subscriber, start)
 		if err != nil {
 			return err
 		}
@@ -267,7 +267,7 @@ func (cs *ConsensusSet) ConsensusSetSubscribe(subscriber modules.ConsensusSetSub
 
 		// Check for shutdown.
 		select {
-		case <-cs.tg.StopChan():
+		case <-cs.tg.StopChan().Done():
 			return siasync.ErrStopped
 		default:
 		}

@@ -3,8 +3,8 @@ package wallet
 import (
 	"math"
 
-	"gitlab.com/NebulousLabs/Sia/modules"
-	"gitlab.com/NebulousLabs/Sia/types"
+	"github.com/HungMingWu/Sia/modules"
+	"github.com/HungMingWu/Sia/types"
 	"gitlab.com/NebulousLabs/errors"
 
 	"github.com/coreos/bbolt"
@@ -26,7 +26,7 @@ func (w *Wallet) threadedResetSubscriptions() error {
 	w.cs.Unsubscribe(w)
 	w.tpool.Unsubscribe(w)
 
-	err := w.cs.ConsensusSetSubscribe(w, modules.ConsensusChangeBeginning, w.tg.StopChan())
+	err := w.cs.ConsensusSetSubscribe(w.tg.StopChan(), w, modules.ConsensusChangeBeginning)
 	if err != nil {
 		return err
 	}

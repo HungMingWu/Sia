@@ -5,16 +5,16 @@ import (
 	"reflect"
 	"testing"
 
-	"gitlab.com/NebulousLabs/Sia/build"
-	"gitlab.com/NebulousLabs/Sia/crypto"
-	"gitlab.com/NebulousLabs/Sia/modules"
-	"gitlab.com/NebulousLabs/Sia/modules/consensus"
-	"gitlab.com/NebulousLabs/Sia/modules/gateway"
-	"gitlab.com/NebulousLabs/Sia/modules/miner"
-	"gitlab.com/NebulousLabs/Sia/modules/renter/contractor"
-	"gitlab.com/NebulousLabs/Sia/modules/transactionpool"
-	"gitlab.com/NebulousLabs/Sia/modules/wallet"
-	"gitlab.com/NebulousLabs/Sia/types"
+	"github.com/HungMingWu/Sia/build"
+	"github.com/HungMingWu/Sia/crypto"
+	"github.com/HungMingWu/Sia/modules"
+	"github.com/HungMingWu/Sia/modules/consensus"
+	"github.com/HungMingWu/Sia/modules/gateway"
+	"github.com/HungMingWu/Sia/modules/miner"
+	"github.com/HungMingWu/Sia/modules/renter/contractor"
+	"github.com/HungMingWu/Sia/modules/transactionpool"
+	"github.com/HungMingWu/Sia/modules/wallet"
+	"github.com/HungMingWu/Sia/types"
 )
 
 // renterTester contains all of the modules that are used while testing the renter.

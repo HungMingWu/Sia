@@ -14,8 +14,8 @@ import (
 	"os"
 	"strings"
 
-	"gitlab.com/NebulousLabs/Sia/build"
-	"gitlab.com/NebulousLabs/Sia/crypto"
+	"github.com/HungMingWu/Sia/build"
+	"github.com/HungMingWu/Sia/crypto"
 
 	"gitlab.com/NebulousLabs/errors"
 )

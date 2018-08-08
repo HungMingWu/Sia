@@ -3,7 +3,7 @@ package miner
 import (
 	"time"
 
-	"gitlab.com/NebulousLabs/Sia/build"
+	"github.com/HungMingWu/Sia/build"
 )
 
 // threadedMine starts a gothread that does CPU mining. threadedMine is the
@@ -31,7 +31,7 @@ func (m *Miner) threadedMine() {
 
 		// Kill the thread if 'Stop' has been called.
 		select {
-		case <-m.tg.StopChan():
+		case <-m.tg.StopChan().Done():
 			m.miningOn = false
 			m.mining = false
 			m.mu.Unlock()

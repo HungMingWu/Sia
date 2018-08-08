@@ -5,7 +5,7 @@ import (
 	"os"
 	"sync"
 
-	"gitlab.com/NebulousLabs/Sia/crypto"
+	"github.com/HungMingWu/Sia/crypto"
 
 	"gitlab.com/NebulousLabs/errors"
 )
@@ -160,7 +160,7 @@ func (r *Renter) managedDownloadLogicalChunkData(chunk *unfinishedUploadChunk) e
 	// Wait for the download to complete.
 	select {
 	case <-d.completeChan:
-	case <-r.tg.StopChan():
+	case <-r.tg.StopChan().Done():
 		return errors.New("repair download interrupted by stop call")
 	}
 	if d.Err() != nil {

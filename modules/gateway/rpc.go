@@ -5,9 +5,9 @@ import (
 	"sync"
 	"time"
 
-	"gitlab.com/NebulousLabs/Sia/build"
-	"gitlab.com/NebulousLabs/Sia/encoding"
-	"gitlab.com/NebulousLabs/Sia/modules"
+	"github.com/HungMingWu/Sia/build"
+	"github.com/HungMingWu/Sia/encoding"
+	"github.com/HungMingWu/Sia/modules"
 )
 
 // rpcID is an 8-byte signature that is added to all RPCs to tell the gatway
@@ -151,7 +151,7 @@ func (g *Gateway) threadedListenPeer(p *peer) {
 
 		// Listen for a stop signal.
 		select {
-		case <-g.threads.StopChan():
+		case <-g.threads.StopChan().Done():
 		case <-peerCloseChan:
 		}
 
@@ -256,7 +256,7 @@ func (g *Gateway) Broadcast(name string, obj interface{}, peers []modules.Peer) 
 				// try one more time before giving up
 				select {
 				case <-time.After(10 * time.Second):
-				case <-g.threads.StopChan():
+				case <-g.threads.StopChan().Done():
 					return
 				}
 				err := g.managedRPC(addr, name, fn)

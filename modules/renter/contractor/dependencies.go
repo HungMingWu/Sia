@@ -2,17 +2,18 @@ package contractor
 
 import (
 	"path/filepath"
+	"context"
 
-	"gitlab.com/NebulousLabs/Sia/modules"
-	"gitlab.com/NebulousLabs/Sia/persist"
-	"gitlab.com/NebulousLabs/Sia/types"
+	"github.com/HungMingWu/Sia/modules"
+	"github.com/HungMingWu/Sia/persist"
+	"github.com/HungMingWu/Sia/types"
 )
 
 // These interfaces define the HostDB's dependencies. Using the smallest
 // interface possible makes it easier to mock these dependencies in testing.
 type (
 	consensusSet interface {
-		ConsensusSetSubscribe(modules.ConsensusSetSubscriber, modules.ConsensusChangeID, <-chan struct{}) error
+		ConsensusSetSubscribe(context.Context, modules.ConsensusSetSubscriber, modules.ConsensusChangeID) error
 		Synced() bool
 		Unsubscribe(modules.ConsensusSetSubscriber)
 	}

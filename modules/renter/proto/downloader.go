@@ -4,11 +4,12 @@ import (
 	"net"
 	"sync"
 	"time"
+	"context"
 
-	"gitlab.com/NebulousLabs/Sia/crypto"
-	"gitlab.com/NebulousLabs/Sia/encoding"
-	"gitlab.com/NebulousLabs/Sia/modules"
-	"gitlab.com/NebulousLabs/Sia/types"
+	"github.com/HungMingWu/Sia/crypto"
+	"github.com/HungMingWu/Sia/encoding"
+	"github.com/HungMingWu/Sia/modules"
+	"github.com/HungMingWu/Sia/types"
 
 	"gitlab.com/NebulousLabs/errors"
 )
@@ -156,7 +157,7 @@ func (hd *Downloader) Close() error {
 
 // NewDownloader initiates the download request loop with a host, and returns a
 // Downloader.
-func (cs *ContractSet) NewDownloader(host modules.HostDBEntry, id types.FileContractID, hdb hostDB, cancel <-chan struct{}) (_ *Downloader, err error) {
+func (cs *ContractSet) NewDownloader(cancel context.Context, host modules.HostDBEntry, id types.FileContractID, hdb hostDB) (_ *Downloader, err error) {
 	sc, ok := cs.Acquire(id)
 	if !ok {
 		return nil, errors.New("invalid contract")
@@ -181,11 +182,11 @@ func (cs *ContractSet) NewDownloader(host modules.HostDBEntry, id types.FileCont
 		}
 	}()
 
-	conn, closeChan, err := initiateRevisionLoop(host, contract, modules.RPCDownload, cancel, cs.rl)
+	conn, closeChan, err := initiateRevisionLoop(cancel, host, contract, modules.RPCDownload, cs.rl)
 	if IsRevisionMismatch(err) && len(sc.unappliedTxns) > 0 {
 		// we have desynced from the host. If we have unapplied updates from the
 		// WAL, try applying them.
-		conn, closeChan, err = initiateRevisionLoop(host, sc.unappliedHeader(), modules.RPCDownload, cancel, cs.rl)
+		conn, closeChan, err = initiateRevisionLoop(cancel, host, sc.unappliedHeader(), modules.RPCDownload, cs.rl)
 		if err != nil {
 			return nil, err
 		}

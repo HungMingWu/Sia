@@ -4,8 +4,8 @@ import (
 	"net"
 	"time"
 
-	"gitlab.com/NebulousLabs/Sia/encoding"
-	"gitlab.com/NebulousLabs/Sia/modules"
+	"github.com/HungMingWu/Sia/encoding"
+	"github.com/HungMingWu/Sia/modules"
 	"gitlab.com/NebulousLabs/errors"
 )
 
@@ -38,7 +38,7 @@ func (g *Gateway) managedIPFromPeers(cancel <-chan struct{}) (string, error) {
 	for {
 		// Check for shutdown signal or timeout.
 		select {
-		case <-g.peerTG.StopChan():
+		case <-g.peerTG.StopChan().Done():
 			return "", errors.New("interrupted by shutdown")
 		case <-timeout:
 			return "", errors.New("failed to discover ip in time")

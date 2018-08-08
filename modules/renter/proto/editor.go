@@ -4,15 +4,16 @@ import (
 	"net"
 	"sync"
 	"time"
+	"context"
 
-	"gitlab.com/NebulousLabs/Sia/build"
-	"gitlab.com/NebulousLabs/Sia/crypto"
-	"gitlab.com/NebulousLabs/Sia/encoding"
-	"gitlab.com/NebulousLabs/Sia/modules"
-	"gitlab.com/NebulousLabs/Sia/types"
+	"github.com/HungMingWu/Sia/build"
+	"github.com/HungMingWu/Sia/crypto"
+	"github.com/HungMingWu/Sia/encoding"
+	"github.com/HungMingWu/Sia/modules"
+	"github.com/HungMingWu/Sia/types"
 
 	"gitlab.com/NebulousLabs/errors"
-	"gitlab.com/NebulousLabs/ratelimit"
+	"github.com/HungMingWu/ratelimit"
 )
 
 // cachedMerkleRoot calculates the root of a set of existing Merkle roots.
@@ -171,7 +172,7 @@ func (he *Editor) Upload(data []byte) (_ modules.RenterContract, _ crypto.Hash, 
 
 // NewEditor initiates the contract revision process with a host, and returns
 // an Editor.
-func (cs *ContractSet) NewEditor(host modules.HostDBEntry, id types.FileContractID, currentHeight types.BlockHeight, hdb hostDB, cancel <-chan struct{}) (_ *Editor, err error) {
+func (cs *ContractSet) NewEditor(cancel context.Context, host modules.HostDBEntry, id types.FileContractID, currentHeight types.BlockHeight, hdb hostDB) (_ *Editor, err error) {
 	sc, ok := cs.Acquire(id)
 	if !ok {
 		return nil, errors.New("invalid contract")
@@ -190,11 +191,11 @@ func (cs *ContractSet) NewEditor(host modules.HostDBEntry, id types.FileContract
 		}
 	}()
 
-	conn, closeChan, err := initiateRevisionLoop(host, contract, modules.RPCReviseContract, cancel, cs.rl)
+	conn, closeChan, err := initiateRevisionLoop(cancel, host, contract, modules.RPCReviseContract, cs.rl)
 	if IsRevisionMismatch(err) && len(sc.unappliedTxns) > 0 {
 		// we have desynced from the host. If we have unapplied updates from the
 		// WAL, try applying them.
-		conn, closeChan, err = initiateRevisionLoop(host, sc.unappliedHeader(), modules.RPCReviseContract, cancel, cs.rl)
+		conn, closeChan, err = initiateRevisionLoop(cancel, host, sc.unappliedHeader(), modules.RPCReviseContract, cs.rl)
 		if err != nil {
 			return nil, err
 		}
@@ -226,20 +227,19 @@ func (cs *ContractSet) NewEditor(host modules.HostDBEntry, id types.FileContract
 
 // initiateRevisionLoop initiates either the editor or downloader loop with
 // host, depending on which rpc was passed.
-func initiateRevisionLoop(host modules.HostDBEntry, contract contractHeader, rpc types.Specifier, cancel <-chan struct{}, rl *ratelimit.RateLimit) (net.Conn, chan struct{}, error) {
+func initiateRevisionLoop(cancel context.Context, host modules.HostDBEntry, contract contractHeader, rpc types.Specifier, rl *ratelimit.RateLimit) (net.Conn, chan struct{}, error) {
 	c, err := (&net.Dialer{
-		Cancel:  cancel,
 		Timeout: 45 * time.Second, // TODO: Constant
-	}).Dial("tcp", string(host.NetAddress))
+	}).DialContext(cancel, "tcp", string(host.NetAddress))
 	if err != nil {
 		return nil, nil, err
 	}
-	conn := ratelimit.NewRLConn(c, rl, cancel)
+	conn := ratelimit.NewRLConn(cancel, c, rl)
 
 	closeChan := make(chan struct{})
 	go func() {
 		select {
-		case <-cancel:
+		case <-cancel.Done():
 			conn.Close()
 		case <-closeChan:
 		}

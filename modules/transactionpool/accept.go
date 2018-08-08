@@ -9,11 +9,11 @@ import (
 	"math"
 	"time"
 
-	"gitlab.com/NebulousLabs/Sia/build"
-	"gitlab.com/NebulousLabs/Sia/crypto"
-	"gitlab.com/NebulousLabs/Sia/encoding"
-	"gitlab.com/NebulousLabs/Sia/modules"
-	"gitlab.com/NebulousLabs/Sia/types"
+	"github.com/HungMingWu/Sia/build"
+	"github.com/HungMingWu/Sia/crypto"
+	"github.com/HungMingWu/Sia/encoding"
+	"github.com/HungMingWu/Sia/modules"
+	"github.com/HungMingWu/Sia/types"
 )
 
 var (
@@ -365,7 +365,7 @@ func (tp *TransactionPool) relayTransactionSet(conn modules.PeerConn) error {
 	defer close(finishedChan)
 	go func() {
 		select {
-		case <-tp.tg.StopChan():
+		case <-tp.tg.StopChan().Done():
 		case <-finishedChan:
 		}
 		conn.Close()

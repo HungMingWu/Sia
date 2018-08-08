@@ -2,11 +2,12 @@ package proto
 
 import (
 	"net"
+	"context"
 
-	"gitlab.com/NebulousLabs/Sia/crypto"
-	"gitlab.com/NebulousLabs/Sia/encoding"
-	"gitlab.com/NebulousLabs/Sia/modules"
-	"gitlab.com/NebulousLabs/Sia/types"
+	"github.com/HungMingWu/Sia/crypto"
+	"github.com/HungMingWu/Sia/encoding"
+	"github.com/HungMingWu/Sia/modules"
+	"github.com/HungMingWu/Sia/types"
 
 	"gitlab.com/NebulousLabs/errors"
 )
@@ -14,7 +15,7 @@ import (
 // Renew negotiates a new contract for data already stored with a host, and
 // submits the new contract transaction to tpool. The new contract is added to
 // the ContractSet and its metadata is returned.
-func (cs *ContractSet) Renew(oldContract *SafeContract, params ContractParams, txnBuilder transactionBuilder, tpool transactionPool, hdb hostDB, cancel <-chan struct{}) (rc modules.RenterContract, err error) {
+func (cs *ContractSet) Renew(cancel context.Context, oldContract *SafeContract, params ContractParams, txnBuilder transactionBuilder, tpool transactionPool, hdb hostDB) (rc modules.RenterContract, err error) {
 	// for convenience
 	contract := oldContract.header
 
@@ -118,11 +119,9 @@ func (cs *ContractSet) Renew(oldContract *SafeContract, params ContractParams, t
 	}()
 
 	// initiate connection
-	dialer := &net.Dialer{
-		Cancel:  cancel,
+	conn, err := (&net.Dialer{
 		Timeout: connTimeout,
-	}
-	conn, err := dialer.Dial("tcp", string(host.NetAddress))
+	}).DialContext(cancel, "tcp", string(host.NetAddress))
 	if err != nil {
 		return modules.RenterContract{}, err
 	}

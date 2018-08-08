@@ -12,11 +12,11 @@ import (
 	"sync"
 	"time"
 
-	"gitlab.com/NebulousLabs/Sia/modules"
-	"gitlab.com/NebulousLabs/Sia/modules/renter/hostdb/hosttree"
-	"gitlab.com/NebulousLabs/Sia/persist"
-	"gitlab.com/NebulousLabs/Sia/types"
-	"gitlab.com/NebulousLabs/threadgroup"
+	"github.com/HungMingWu/Sia/modules"
+	"github.com/HungMingWu/Sia/modules/renter/hostdb/hosttree"
+	"github.com/HungMingWu/Sia/persist"
+	"github.com/HungMingWu/Sia/types"
+	"github.com/HungMingWu/threadgroup"
 )
 
 var (
@@ -155,7 +155,7 @@ func NewCustomHostDB(g modules.Gateway, cs modules.ConsensusSet, persistDir stri
 	}
 	hdb.mu.Unlock()
 
-	err = cs.ConsensusSetSubscribe(hdb, hdb.lastChange, hdb.tg.StopChan())
+	err = cs.ConsensusSetSubscribe(hdb.tg.StopChan(), hdb, hdb.lastChange)
 	if err == modules.ErrInvalidConsensusChangeID {
 		// Subscribe again using the new ID. This will cause a triggered scan
 		// on all of the hosts, but that should be acceptable.
@@ -163,7 +163,7 @@ func NewCustomHostDB(g modules.Gateway, cs modules.ConsensusSet, persistDir stri
 		hdb.blockHeight = 0
 		hdb.lastChange = modules.ConsensusChangeBeginning
 		hdb.mu.Unlock()
-		err = cs.ConsensusSetSubscribe(hdb, hdb.lastChange, hdb.tg.StopChan())
+		err = cs.ConsensusSetSubscribe(hdb.tg.StopChan(), hdb, hdb.lastChange)
 	}
 	if err != nil {
 		return nil, errors.New("hostdb subscription failed: " + err.Error())

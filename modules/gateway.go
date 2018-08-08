@@ -2,8 +2,9 @@ package modules
 
 import (
 	"net"
+	"context"
 
-	"gitlab.com/NebulousLabs/Sia/build"
+	"github.com/HungMingWu/Sia/build"
 )
 
 const (
@@ -169,7 +170,7 @@ type (
 		// of the gateway. Contrary to Address, DiscoverAddress is blocking and
 		// might take multiple minutes to return. A channel to cancel the
 		// discovery can be supplied optionally.
-		DiscoverAddress(cancel <-chan struct{}) (NetAddress, error)
+		DiscoverAddress(cancel context.Context) (NetAddress, error)
 
 		// Address returns the Gateway's address.
 		Address() NetAddress

@@ -2,9 +2,10 @@ package modules
 
 import (
 	"errors"
+	"context"
 
-	"gitlab.com/NebulousLabs/Sia/crypto"
-	"gitlab.com/NebulousLabs/Sia/types"
+	"github.com/HungMingWu/Sia/crypto"
+	"github.com/HungMingWu/Sia/types"
 )
 
 const (
@@ -208,7 +209,7 @@ type (
 		// change with the provided id. There are a few special cases,
 		// described by the ConsensusChangeX variables in this package.
 		// A channel can be provided to abort the subscription process.
-		ConsensusSetSubscribe(ConsensusSetSubscriber, ConsensusChangeID, <-chan struct{}) error
+		ConsensusSetSubscribe(context.Context, ConsensusSetSubscriber, ConsensusChangeID) error
 
 		// CurrentBlock returns the latest block in the heaviest known
 		// blockchain.

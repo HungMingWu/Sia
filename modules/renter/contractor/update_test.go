@@ -4,10 +4,10 @@ import (
 	"testing"
 	"time"
 
-	"gitlab.com/NebulousLabs/Sia/build"
-	"gitlab.com/NebulousLabs/Sia/crypto"
-	"gitlab.com/NebulousLabs/Sia/modules"
-	"gitlab.com/NebulousLabs/Sia/types"
+	"github.com/HungMingWu/Sia/build"
+	"github.com/HungMingWu/Sia/crypto"
+	"github.com/HungMingWu/Sia/modules"
+	"github.com/HungMingWu/Sia/types"
 
 	"gitlab.com/NebulousLabs/errors"
 	"gitlab.com/NebulousLabs/fastrand"
@@ -49,7 +49,7 @@ func TestIntegrationAutoRenew(t *testing.T) {
 	contract := c.Contracts()[0]
 
 	// revise the contract
-	editor, err := c.Editor(contract.HostPublicKey, nil)
+	editor, err := c.Editor(nil, contract.HostPublicKey)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -121,7 +121,7 @@ func TestIntegrationRenewInvalidate(t *testing.T) {
 	contract := c.Contracts()[0]
 
 	// revise the contract
-	editor, err := c.Editor(contract.HostPublicKey, nil)
+	editor, err := c.Editor(nil, contract.HostPublicKey)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -162,7 +162,7 @@ func TestIntegrationRenewInvalidate(t *testing.T) {
 	editor.Close()
 
 	// create a downloader
-	downloader, err := c.Downloader(contract.HostPublicKey, nil)
+	downloader, err := c.Downloader(nil, contract.HostPublicKey)
 	if err != nil {
 		t.Fatal(err)
 	}

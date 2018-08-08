@@ -3,6 +3,7 @@ package sync
 import (
 	"errors"
 	"sync"
+	"context"
 )
 
 // ErrStopped is returned by ThreadGroup methods if Stop has already been
@@ -26,7 +27,8 @@ type ThreadGroup struct {
 	afterStopFns []func()
 
 	once     sync.Once
-	stopChan chan struct{}
+	stopChan context.Context
+	cancel   context.CancelFunc
 	bmu      sync.Mutex // Ensures blocking between calls to 'Add', 'Flush', and 'Stop'
 	mu       sync.Mutex // Protects the 'onStopFns' and 'afterStopFns' variable
 	wg       sync.WaitGroup
@@ -34,14 +36,14 @@ type ThreadGroup struct {
 
 // init creates the stop channel for the thread group.
 func (tg *ThreadGroup) init() {
-	tg.stopChan = make(chan struct{})
+	tg.stopChan, tg.cancel = context.WithCancel(context.Background())
 }
 
 // isStopped will return true if Stop() has been called on the thread group.
 func (tg *ThreadGroup) isStopped() bool {
 	tg.once.Do(tg.init)
 	select {
-	case <-tg.stopChan:
+	case <-tg.stopChan.Done():
 		return true
 	default:
 		return false
@@ -128,7 +130,7 @@ func (tg *ThreadGroup) Stop() error {
 	if tg.isStopped() {
 		return ErrStopped
 	}
-	close(tg.stopChan)
+	tg.cancel()
 
 	tg.mu.Lock()
 	for i := len(tg.onStopFns) - 1; i >= 0; i-- {
@@ -153,7 +155,7 @@ func (tg *ThreadGroup) Stop() error {
 // StopChan provides read-only access to the ThreadGroup's stopChan. Callers
 // should select on StopChan in order to interrupt long-running reads (such as
 // time.After).
-func (tg *ThreadGroup) StopChan() <-chan struct{} {
+func (tg *ThreadGroup) StopChan() context.Context {
 	tg.once.Do(tg.init)
 	return tg.stopChan
 }

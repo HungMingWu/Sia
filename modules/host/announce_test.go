@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"testing"
 
-	"gitlab.com/NebulousLabs/Sia/modules"
-	"gitlab.com/NebulousLabs/Sia/types"
+	"github.com/HungMingWu/Sia/modules"
+	"github.com/HungMingWu/Sia/types"
 )
 
 // announcementFinder is a quick module that parses the blockchain for host
@@ -45,7 +45,7 @@ func newAnnouncementFinder(cs modules.ConsensusSet) (*announcementFinder, error)
 	af := &announcementFinder{
 		cs: cs,
 	}
-	err := cs.ConsensusSetSubscribe(af, modules.ConsensusChangeBeginning, nil)
+	err := cs.ConsensusSetSubscribe(nil, af, modules.ConsensusChangeBeginning)
 	if err != nil {
 		return nil, err
 	}

@@ -6,9 +6,9 @@ import (
 	"reflect"
 	"time"
 
-	"gitlab.com/NebulousLabs/Sia/encoding"
-	"gitlab.com/NebulousLabs/Sia/modules"
-	"gitlab.com/NebulousLabs/Sia/types"
+	"github.com/HungMingWu/Sia/encoding"
+	"github.com/HungMingWu/Sia/modules"
+	"github.com/HungMingWu/Sia/types"
 	"gitlab.com/NebulousLabs/errors"
 	"gitlab.com/NebulousLabs/fastrand"
 
@@ -78,7 +78,7 @@ func (w *Wallet) threadedDBUpdate() {
 	for {
 		select {
 		case <-time.After(2 * time.Minute):
-		case <-w.tg.StopChan():
+		case <-w.tg.StopChan().Done():
 			return
 		}
 		w.mu.Lock()

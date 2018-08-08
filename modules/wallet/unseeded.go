@@ -3,10 +3,10 @@ package wallet
 import (
 	"errors"
 
-	"gitlab.com/NebulousLabs/Sia/crypto"
-	"gitlab.com/NebulousLabs/Sia/encoding"
-	"gitlab.com/NebulousLabs/Sia/modules"
-	"gitlab.com/NebulousLabs/Sia/types"
+	"github.com/HungMingWu/Sia/crypto"
+	"github.com/HungMingWu/Sia/encoding"
+	"github.com/HungMingWu/Sia/modules"
+	"github.com/HungMingWu/Sia/types"
 	"gitlab.com/NebulousLabs/fastrand"
 )
 
@@ -213,7 +213,7 @@ func (w *Wallet) LoadSiagKeys(masterKey crypto.TwofishKey, keyfiles []string) er
 	go w.rescanMessage(done)
 	defer close(done)
 
-	err = w.cs.ConsensusSetSubscribe(w, modules.ConsensusChangeBeginning, w.tg.StopChan())
+	err = w.cs.ConsensusSetSubscribe(w.tg.StopChan(), w, modules.ConsensusChangeBeginning)
 	if err != nil {
 		return err
 	}
@@ -283,7 +283,7 @@ func (w *Wallet) Load033xWallet(masterKey crypto.TwofishKey, filepath033x string
 	go w.rescanMessage(done)
 	defer close(done)
 
-	err = w.cs.ConsensusSetSubscribe(w, modules.ConsensusChangeBeginning, w.tg.StopChan())
+	err = w.cs.ConsensusSetSubscribe(w.tg.StopChan(), w, modules.ConsensusChangeBeginning)
 	if err != nil {
 		return err
 	}

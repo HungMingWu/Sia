@@ -7,11 +7,11 @@ import (
 	"time"
 
 	"github.com/coreos/bbolt"
-	"gitlab.com/NebulousLabs/Sia/build"
-	"gitlab.com/NebulousLabs/Sia/crypto"
-	"gitlab.com/NebulousLabs/Sia/encoding"
-	"gitlab.com/NebulousLabs/Sia/modules"
-	"gitlab.com/NebulousLabs/Sia/types"
+	"github.com/HungMingWu/Sia/build"
+	"github.com/HungMingWu/Sia/crypto"
+	"github.com/HungMingWu/Sia/encoding"
+	"github.com/HungMingWu/Sia/modules"
+	"github.com/HungMingWu/Sia/types"
 	"gitlab.com/NebulousLabs/fastrand"
 )
 
@@ -202,7 +202,7 @@ func (w *Wallet) managedUnlock(masterKey crypto.TwofishKey) error {
 		go w.rescanMessage(done)
 		defer close(done)
 
-		err = w.cs.ConsensusSetSubscribe(w, lastChange, w.tg.StopChan())
+		err = w.cs.ConsensusSetSubscribe(w.tg.StopChan(), w, lastChange)
 		if err == modules.ErrInvalidConsensusChangeID {
 			// something went wrong; resubscribe from the beginning
 			err = dbPutConsensusChangeID(w.dbTx, modules.ConsensusChangeBeginning)
@@ -213,7 +213,7 @@ func (w *Wallet) managedUnlock(masterKey crypto.TwofishKey) error {
 			if err != nil {
 				return fmt.Errorf("failed to reset db during rescan: %v", err)
 			}
-			err = w.cs.ConsensusSetSubscribe(w, modules.ConsensusChangeBeginning, w.tg.StopChan())
+			err = w.cs.ConsensusSetSubscribe(w.tg.StopChan(), w, modules.ConsensusChangeBeginning)
 		}
 		if err != nil {
 			return fmt.Errorf("wallet subscription failed: %v", err)
@@ -376,7 +376,7 @@ func (w *Wallet) InitFromSeed(masterKey crypto.TwofishKey, seed modules.Seed) er
 
 	// estimate the primarySeedProgress by scanning the blockchain
 	s := newSeedScanner(seed, w.log)
-	if err := s.scan(w.cs, w.tg.StopChan()); err != nil {
+	if err := s.scan(w.tg.StopChan(), w.cs); err != nil {
 		return err
 	}
 	// NOTE: each time the wallet generates a key for index n, it sets its

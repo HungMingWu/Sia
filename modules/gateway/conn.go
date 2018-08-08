@@ -4,7 +4,7 @@ import (
 	"net"
 	"time"
 
-	"gitlab.com/NebulousLabs/Sia/modules"
+	"github.com/HungMingWu/Sia/modules"
 )
 
 // peerConn is a simple type that implements the modules.PeerConn interface.
@@ -23,11 +23,9 @@ func (pc peerConn) RPCAddr() modules.NetAddress {
 // handles things like clean shutdown, fast shutdown, and chooses the correct
 // communication protocol.
 func (g *Gateway) staticDial(addr modules.NetAddress) (net.Conn, error) {
-	dialer := &net.Dialer{
-		Cancel:  g.threads.StopChan(),
+	conn, err := (&net.Dialer{
 		Timeout: dialTimeout,
-	}
-	conn, err := dialer.Dial("tcp", string(addr))
+	}).DialContext( g.threads.StopChan(), "tcp", string(addr))
 	if err != nil {
 		return nil, err
 	}

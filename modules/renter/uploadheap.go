@@ -22,9 +22,9 @@ import (
 	"sync"
 	"time"
 
-	"gitlab.com/NebulousLabs/Sia/build"
-	"gitlab.com/NebulousLabs/Sia/crypto"
-	"gitlab.com/NebulousLabs/Sia/types"
+	"github.com/HungMingWu/Sia/build"
+	"github.com/HungMingWu/Sia/crypto"
+	"github.com/HungMingWu/Sia/types"
 )
 
 // uploadHeap contains a priority-sorted heap of all the chunks being uploaded
@@ -347,7 +347,7 @@ func (r *Renter) threadedUploadLoop() {
 		for {
 			// Return if the renter has shut down.
 			select {
-			case <-r.tg.StopChan():
+			case <-r.tg.StopChan().Done():
 				return
 			default:
 			}
@@ -387,7 +387,7 @@ func (r *Renter) threadedUploadLoop() {
 			// User has uploaded a new file.
 		case <-rebuildHeapSignal:
 			// Time to check the filesystem health again.
-		case <-r.tg.StopChan():
+		case <-r.tg.StopChan().Done():
 			// The renter has shut down.
 			return
 		}

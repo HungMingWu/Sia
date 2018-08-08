@@ -7,8 +7,9 @@ package renter
 
 import (
 	"sync"
+	"context"
 
-	"gitlab.com/NebulousLabs/Sia/build"
+	"github.com/HungMingWu/Sia/build"
 )
 
 // memoryManager can handle requests for memory and returns of memory. The
@@ -27,7 +28,7 @@ type memoryManager struct {
 	fifo         []*memoryRequest
 	priorityFifo []*memoryRequest
 	mu           sync.Mutex
-	stop         <-chan struct{}
+	stop         context.Context
 	underflow    uint64
 }
 
@@ -90,7 +91,7 @@ func (mm *memoryManager) Request(amount uint64, priority bool) bool {
 	select {
 	case <-myRequest.done:
 		return true
-	case <-mm.stop:
+	case <-mm.stop.Done():
 		return false
 	}
 }
@@ -149,7 +150,7 @@ func (mm *memoryManager) Return(amount uint64) {
 }
 
 // newMemoryManager will create a memoryManager and return it.
-func newMemoryManager(baseMemory uint64, stopChan <-chan struct{}) *memoryManager {
+func newMemoryManager(stopChan context.Context, baseMemory uint64) *memoryManager {
 	return &memoryManager{
 		available: baseMemory,
 		base:      baseMemory,

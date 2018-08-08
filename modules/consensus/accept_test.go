@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"gitlab.com/NebulousLabs/Sia/modules"
-	"gitlab.com/NebulousLabs/Sia/persist"
-	"gitlab.com/NebulousLabs/Sia/types"
+	"github.com/HungMingWu/Sia/modules"
+	"github.com/HungMingWu/Sia/persist"
+	"github.com/HungMingWu/Sia/types"
 
 	"github.com/coreos/bbolt"
 )
@@ -1087,7 +1087,7 @@ func TestChainedAcceptBlock(t *testing.T) {
 	defer cst2.Close()
 	// Subscribe a blockCountingSubscriber to cst2.
 	var bcs blockCountingSubscriber
-	cst2.cs.ConsensusSetSubscribe(&bcs, modules.ConsensusChangeBeginning, cst2.cs.tg.StopChan())
+	cst2.cs.ConsensusSetSubscribe(cst2.cs.tg.StopChan(), &bcs, modules.ConsensusChangeBeginning)
 	if len(bcs.changes) != 1 || bcs.appliedBlocks != 1 || bcs.revertedBlocks != 0 {
 		t.Error("consensus changes do not seem to be getting passed to subscribers correctly")
 	}

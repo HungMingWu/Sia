@@ -4,8 +4,8 @@ import (
 	"sync"
 	"time"
 
-	"gitlab.com/NebulousLabs/Sia/modules"
-	"gitlab.com/NebulousLabs/Sia/types"
+	"github.com/HungMingWu/Sia/modules"
+	"github.com/HungMingWu/Sia/types"
 )
 
 // A worker listens for work on a certain host.
@@ -138,7 +138,7 @@ func (w *worker) threadedWorkLoop() {
 			continue
 		case <-w.killChan:
 			return
-		case <-w.renter.tg.StopChan():
+		case <-w.renter.tg.StopChan().Done():
 			return
 		}
 	}

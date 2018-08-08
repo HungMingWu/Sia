@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"gitlab.com/NebulousLabs/Sia/build"
+	"github.com/HungMingWu/Sia/build"
 )
 
 // TestThreadGroupStopEarly tests that a thread group can correctly interrupt
@@ -30,7 +30,7 @@ func TestThreadGroupStopEarly(t *testing.T) {
 			defer tg.Done()
 			select {
 			case <-time.After(1 * time.Second):
-			case <-tg.StopChan():
+			case <-tg.StopChan().Done():
 			}
 		}()
 	}
@@ -89,7 +89,7 @@ func TestThreadGroupStop(t *testing.T) {
 	}
 	// The cannel provided by StopChan should be open.
 	select {
-	case <-tg.StopChan():
+	case <-tg.StopChan().Done():
 		t.Error("stop chan appears to be closed")
 	default:
 	}
@@ -141,7 +141,7 @@ func TestThreadGroupStop(t *testing.T) {
 	}
 	// The cannel provided by StopChan should be closed.
 	select {
-	case <-tg.StopChan():
+	case <-tg.StopChan().Done():
 	default:
 		t.Error("stop chan appears to be closed")
 	}
@@ -207,7 +207,7 @@ func TestThreadGroupConcurrentAdd(t *testing.T) {
 
 			select {
 			case <-time.After(1 * time.Second):
-			case <-tg.StopChan():
+			case <-tg.StopChan().Done():
 			}
 		}()
 	}
@@ -227,7 +227,7 @@ func TestThreadGroupOnce(t *testing.T) {
 	}
 
 	// these methods should cause stopChan to be initialized
-	tg.StopChan()
+	tg.StopChan().Done()
 	if tg.stopChan == nil {
 		t.Error("stopChan should have been initialized by StopChan")
 	}
@@ -285,7 +285,7 @@ func TestThreadGroupOnStop(t *testing.T) {
 // does not trigger the race detector.
 func TestThreadGroupRace(t *testing.T) {
 	var tg ThreadGroup
-	go tg.StopChan()
+	go tg.StopChan().Done()
 	go func() {
 		if tg.Add() == nil {
 			tg.Done()

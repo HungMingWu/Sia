@@ -7,6 +7,7 @@ package gateway
 
 import (
 	"time"
+	"context"
 )
 
 // For the user to be securely connected to the network, the user must be
@@ -103,9 +104,9 @@ import (
 	"path/filepath"
 	"sync"
 
-	"gitlab.com/NebulousLabs/Sia/modules"
-	"gitlab.com/NebulousLabs/Sia/persist"
-	siasync "gitlab.com/NebulousLabs/Sia/sync"
+	"github.com/HungMingWu/Sia/modules"
+	"github.com/HungMingWu/Sia/persist"
+	siasync "github.com/HungMingWu/Sia/sync"
 	"gitlab.com/NebulousLabs/fastrand"
 )
 
@@ -164,7 +165,7 @@ func (g *Gateway) managedSleep(t time.Duration) (completed bool) {
 	select {
 	case <-time.After(t):
 		return true
-	case <-g.threads.StopChan():
+	case <-g.threads.StopChan().Done():
 		return false
 	}
 }
@@ -191,7 +192,7 @@ func (g *Gateway) Close() error {
 // multiple minutes to return. A channel to cancel the discovery can be
 // supplied optionally. If nil is supplied, a reasonable timeout will be used
 // by default.
-func (g *Gateway) DiscoverAddress(cancel <-chan struct{}) (modules.NetAddress, error) {
+func (g *Gateway) DiscoverAddress(cancel context.Context) (modules.NetAddress, error) {
 	return g.managedLearnHostname(cancel)
 }
 

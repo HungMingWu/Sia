@@ -108,7 +108,7 @@ func (r *Renter) managedAddChunkToDownloadHeap(udc *unfinishedDownloadChunk) {
 func (r *Renter) managedBlockUntilOnline() bool {
 	for !r.g.Online() {
 		select {
-		case <-r.tg.StopChan():
+		case <-r.tg.StopChan().Done():
 			return false
 		case <-time.After(offlineCheckFrequency):
 		}
@@ -211,7 +211,7 @@ LOOP:
 
 		// Wait for more work.
 		select {
-		case <-r.tg.StopChan():
+		case <-r.tg.StopChan().Done():
 			return
 		case <-r.newDownloads:
 		}

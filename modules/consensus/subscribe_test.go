@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	bolt "github.com/coreos/bbolt"
-	"gitlab.com/NebulousLabs/Sia/modules"
+	"github.com/HungMingWu/Sia/modules"
 )
 
 // mockSubscriber receives and holds changes to the consensus set, remembering
@@ -51,7 +51,7 @@ func TestInvalidConsensusChangeSubscription(t *testing.T) {
 
 	ms := newMockSubscriber()
 	badCCID := modules.ConsensusChangeID{255, 255, 255}
-	err = cst.cs.ConsensusSetSubscribe(&ms, badCCID, cst.cs.tg.StopChan())
+	err = cst.cs.ConsensusSetSubscribe(cst.cs.tg.StopChan(), &ms, badCCID)
 	if err != modules.ErrInvalidConsensusChangeID {
 		t.Error("consensus set returning the wrong error during an invalid subscription:", err)
 	}
@@ -83,13 +83,13 @@ func TestInvalidToValidSubscription(t *testing.T) {
 	// Start by performing a bad subscribe.
 	ms := newMockSubscriber()
 	badCCID := modules.ConsensusChangeID{255, 255, 255}
-	err = cst.cs.ConsensusSetSubscribe(&ms, badCCID, cst.cs.tg.StopChan())
+	err = cst.cs.ConsensusSetSubscribe(cst.cs.tg.StopChan(), &ms, badCCID)
 	if err != modules.ErrInvalidConsensusChangeID {
 		t.Error("consensus set returning the wrong error during an invalid subscription:", err)
 	}
 
 	// Perform a correct subscribe.
-	err = cst.cs.ConsensusSetSubscribe(&ms, modules.ConsensusChangeBeginning, cst.cs.tg.StopChan())
+	err = cst.cs.ConsensusSetSubscribe(cst.cs.tg.StopChan(), &ms, modules.ConsensusChangeBeginning)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -121,7 +121,7 @@ func TestUnsubscribe(t *testing.T) {
 
 	// Subscribe the mock subscriber to the consensus set.
 	ms := newMockSubscriber()
-	err = cst.cs.ConsensusSetSubscribe(&ms, modules.ConsensusChangeBeginning, cst.cs.tg.StopChan())
+	err = cst.cs.ConsensusSetSubscribe(cst.cs.tg.StopChan(), &ms, modules.ConsensusChangeBeginning)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -179,7 +179,7 @@ func TestModuleDesync(t *testing.T) {
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go func() {
-		err = cst.cs.ConsensusSetSubscribe(&ms, modules.ConsensusChangeBeginning, cst.cs.tg.StopChan())
+		err = cst.cs.ConsensusSetSubscribe(cst.cs.tg.StopChan(), &ms, modules.ConsensusChangeBeginning)
 		if err != nil {
 			t.Error("consensus set returning the wrong error during an invalid subscription:", err)
 		}

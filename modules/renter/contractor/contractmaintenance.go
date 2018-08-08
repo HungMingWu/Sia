@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"math/big"
 
-	"gitlab.com/NebulousLabs/Sia/build"
-	"gitlab.com/NebulousLabs/Sia/modules"
-	"gitlab.com/NebulousLabs/Sia/modules/renter/proto"
-	"gitlab.com/NebulousLabs/Sia/types"
+	"github.com/HungMingWu/Sia/build"
+	"github.com/HungMingWu/Sia/modules"
+	"github.com/HungMingWu/Sia/modules/renter/proto"
+	"github.com/HungMingWu/Sia/types"
 
 	"gitlab.com/NebulousLabs/errors"
 )
@@ -271,7 +271,7 @@ func (c *Contractor) managedNewContract(host modules.HostDBEntry, contractFundin
 	if err != nil {
 		return types.ZeroCurrency, modules.RenterContract{}, err
 	}
-	contract, err := c.staticContracts.FormContract(params, txnBuilder, c.tpool, c.hdb, c.tg.StopChan())
+	contract, err := c.staticContracts.FormContract(c.tg.StopChan(), params, txnBuilder, c.tpool, c.hdb)
 	if err != nil {
 		txnBuilder.Drop()
 		return types.ZeroCurrency, modules.RenterContract{}, err
@@ -361,7 +361,7 @@ func (c *Contractor) managedRenew(sc *proto.SafeContract, contractFunding types.
 	if err != nil {
 		return modules.RenterContract{}, err
 	}
-	newContract, err := c.staticContracts.Renew(sc, params, txnBuilder, c.tpool, c.hdb, c.tg.StopChan())
+	newContract, err := c.staticContracts.Renew(c.tg.StopChan(), sc, params, txnBuilder, c.tpool, c.hdb)
 	if err != nil {
 		txnBuilder.Drop() // return unused outputs to wallet
 		return modules.RenterContract{}, err
@@ -684,7 +684,7 @@ func (c *Contractor) threadedContractMaintenance() {
 
 		// Return here if an interrupt or kill signal has been sent.
 		select {
-		case <-c.tg.StopChan():
+		case <-c.tg.StopChan().Done():
 			return
 		case <-c.interruptMaintenance:
 			return
@@ -705,7 +705,7 @@ func (c *Contractor) threadedContractMaintenance() {
 
 		// Return here if an interrupt or kill signal has been sent.
 		select {
-		case <-c.tg.StopChan():
+		case <-c.tg.StopChan().Done():
 			return
 		case <-c.interruptMaintenance:
 			return
@@ -785,7 +785,7 @@ func (c *Contractor) threadedContractMaintenance() {
 
 		// Soft sleep before making the next contract.
 		select {
-		case <-c.tg.StopChan():
+		case <-c.tg.StopChan().Done():
 			return
 		case <-c.interruptMaintenance:
 			return

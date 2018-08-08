@@ -2,11 +2,12 @@ package wallet
 
 import (
 	"fmt"
+	"context"
 
-	"gitlab.com/NebulousLabs/Sia/build"
-	"gitlab.com/NebulousLabs/Sia/modules"
-	"gitlab.com/NebulousLabs/Sia/persist"
-	"gitlab.com/NebulousLabs/Sia/types"
+	"github.com/HungMingWu/Sia/build"
+	"github.com/HungMingWu/Sia/modules"
+	"github.com/HungMingWu/Sia/persist"
+	"github.com/HungMingWu/Sia/types"
 )
 
 const scanMultiplier = 4 // how many more keys to generate after each scan iteration
@@ -141,7 +142,7 @@ func (s *seedScanner) ProcessConsensusChange(cc modules.ConsensusChange) {
 // scan subscribes s to cs and scans the blockchain for addresses that belong
 // to s's seed. If scan returns errMaxKeys, additional keys may need to be
 // generated to find all the addresses.
-func (s *seedScanner) scan(cs modules.ConsensusSet, cancel <-chan struct{}) error {
+func (s *seedScanner) scan(cancel context.Context, cs modules.ConsensusSet) error {
 	// generate a bunch of keys and scan the blockchain looking for them. If
 	// none of the 'upper' half of the generated keys are found, we are done;
 	// otherwise, generate more keys and try again (bounded by a sane
@@ -152,7 +153,7 @@ func (s *seedScanner) scan(cs modules.ConsensusSet, cancel <-chan struct{}) erro
 	var numKeys uint64 = numInitialKeys
 	for s.numKeys() < maxScanKeys {
 		s.generateKeys(numKeys)
-		if err := cs.ConsensusSetSubscribe(s, modules.ConsensusChangeBeginning, cancel); err != nil {
+		if err := cs.ConsensusSetSubscribe(cancel, s, modules.ConsensusChangeBeginning); err != nil {
 			return err
 		}
 		cs.Unsubscribe(s)

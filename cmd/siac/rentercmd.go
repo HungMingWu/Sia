@@ -16,9 +16,9 @@ import (
 	"github.com/spf13/cobra"
 	"gitlab.com/NebulousLabs/errors"
 
-	"gitlab.com/NebulousLabs/Sia/modules"
-	"gitlab.com/NebulousLabs/Sia/node/api"
-	"gitlab.com/NebulousLabs/Sia/types"
+	"github.com/HungMingWu/Sia/modules"
+	"github.com/HungMingWu/Sia/node/api"
+	"github.com/HungMingWu/Sia/types"
 )
 
 var (

@@ -1,8 +1,8 @@
 package siatest
 
 import (
-	"gitlab.com/NebulousLabs/Sia/crypto"
-	"gitlab.com/NebulousLabs/Sia/modules"
+	"github.com/HungMingWu/Sia/crypto"
+	"github.com/HungMingWu/Sia/modules"
 )
 
 // ChunkSize is a helper method to calculate the size of a chunk depending on

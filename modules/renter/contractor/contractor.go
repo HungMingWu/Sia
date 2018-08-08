@@ -14,11 +14,11 @@ import (
 	"path/filepath"
 	"sync"
 
-	"gitlab.com/NebulousLabs/Sia/modules"
-	"gitlab.com/NebulousLabs/Sia/modules/renter/proto"
-	"gitlab.com/NebulousLabs/Sia/persist"
-	siasync "gitlab.com/NebulousLabs/Sia/sync"
-	"gitlab.com/NebulousLabs/Sia/types"
+	"github.com/HungMingWu/Sia/modules"
+	"github.com/HungMingWu/Sia/modules/renter/proto"
+	"github.com/HungMingWu/Sia/persist"
+	siasync "github.com/HungMingWu/Sia/sync"
+	"github.com/HungMingWu/Sia/types"
 )
 
 var (
@@ -250,12 +250,12 @@ func NewCustomContractor(cs consensusSet, w wallet, tp transactionPool, hdb host
 	}
 
 	// Subscribe to the consensus set.
-	err = cs.ConsensusSetSubscribe(c, c.lastChange, c.tg.StopChan())
+	err = cs.ConsensusSetSubscribe(c.tg.StopChan(), c, c.lastChange)
 	if err == modules.ErrInvalidConsensusChangeID {
 		// Reset the contractor consensus variables and try rescanning.
 		c.blockHeight = 0
 		c.lastChange = modules.ConsensusChangeBeginning
-		err = cs.ConsensusSetSubscribe(c, c.lastChange, c.tg.StopChan())
+		err = cs.ConsensusSetSubscribe(c.tg.StopChan(), c, c.lastChange)
 	}
 	if err != nil {
 		return nil, errors.New("contractor subscription failed: " + err.Error())

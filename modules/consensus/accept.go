@@ -7,8 +7,8 @@ import (
 	"os"
 	"time"
 
-	"gitlab.com/NebulousLabs/Sia/modules"
-	"gitlab.com/NebulousLabs/Sia/types"
+	"github.com/HungMingWu/Sia/modules"
+	"github.com/HungMingWu/Sia/types"
 
 	"github.com/coreos/bbolt"
 )
@@ -196,7 +196,7 @@ func (cs *ConsensusSet) threadedSleepOnFutureBlock(b types.Block) {
 
 	// Perform a soft-sleep while we wait for the block to become valid.
 	select {
-	case <-cs.tg.StopChan():
+	case <-cs.tg.StopChan().Done():
 		return
 	case <-time.After(time.Duration(b.Timestamp-(types.CurrentTimestamp()+types.FutureThreshold)) * time.Second):
 		_, err := cs.managedAcceptBlocks([]types.Block{b})

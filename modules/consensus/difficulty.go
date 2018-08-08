@@ -5,7 +5,7 @@ import (
 	"encoding/binary"
 	"math/big"
 
-	"gitlab.com/NebulousLabs/Sia/types"
+	"github.com/HungMingWu/Sia/types"
 
 	"github.com/coreos/bbolt"
 	"gitlab.com/NebulousLabs/errors"

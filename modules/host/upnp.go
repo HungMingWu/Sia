@@ -6,8 +6,8 @@ import (
 	"net"
 	"strconv"
 
-	"gitlab.com/NebulousLabs/Sia/build"
-	"gitlab.com/NebulousLabs/Sia/modules"
+	"github.com/HungMingWu/Sia/build"
+	"github.com/HungMingWu/Sia/modules"
 
 	"gitlab.com/NebulousLabs/go-upnp"
 )
@@ -110,7 +110,7 @@ func (h *Host) managedForwardPort(port string) error {
 	defer cancel()
 	go func() {
 		select {
-		case <-h.tg.StopChan():
+		case <-h.tg.StopChan().Done():
 			cancel()
 		case <-ctx.Done():
 		}
@@ -154,7 +154,7 @@ func (h *Host) managedClearPort() error {
 	defer cancel()
 	go func() {
 		select {
-		case <-h.tg.StopChan():
+		case <-h.tg.StopChan().Done():
 			cancel()
 		case <-ctx.Done():
 		}

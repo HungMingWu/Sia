@@ -3,11 +3,12 @@ package contractor
 import (
 	"errors"
 	"sync"
+	"context"
 
-	"gitlab.com/NebulousLabs/Sia/crypto"
-	"gitlab.com/NebulousLabs/Sia/modules"
-	"gitlab.com/NebulousLabs/Sia/modules/renter/proto"
-	"gitlab.com/NebulousLabs/Sia/types"
+	"github.com/HungMingWu/Sia/crypto"
+	"github.com/HungMingWu/Sia/modules"
+	"github.com/HungMingWu/Sia/modules/renter/proto"
+	"github.com/HungMingWu/Sia/types"
 )
 
 var errInvalidDownloader = errors.New("downloader has been invalidated because its contract is being renewed")
@@ -103,7 +104,7 @@ func (hd *hostDownloader) Sector(root crypto.Hash) ([]byte, error) {
 
 // Downloader returns a Downloader object that can be used to download sectors
 // from a host.
-func (c *Contractor) Downloader(pk types.SiaPublicKey, cancel <-chan struct{}) (_ Downloader, err error) {
+func (c *Contractor) Downloader(cancel context.Context, pk types.SiaPublicKey) (_ Downloader, err error) {
 	c.mu.RLock()
 	id, gotID := c.pubKeysToContractID[string(pk.Key)]
 	cachedDownloader, haveDownloader := c.downloaders[id]
@@ -160,7 +161,7 @@ func (c *Contractor) Downloader(pk types.SiaPublicKey, cancel <-chan struct{}) (
 	}()
 
 	// create downloader
-	d, err := c.staticContracts.NewDownloader(host, contract.ID, c.hdb, cancel)
+	d, err := c.staticContracts.NewDownloader(cancel, host, contract.ID, c.hdb)
 	if err != nil {
 		return nil, err
 	}

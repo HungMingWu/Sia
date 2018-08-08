@@ -3,10 +3,10 @@ package wallet
 import (
 	"testing"
 
-	"gitlab.com/NebulousLabs/Sia/build"
-	"gitlab.com/NebulousLabs/Sia/crypto"
-	"gitlab.com/NebulousLabs/Sia/modules"
-	"gitlab.com/NebulousLabs/Sia/types"
+	"github.com/HungMingWu/Sia/build"
+	"github.com/HungMingWu/Sia/crypto"
+	"github.com/HungMingWu/Sia/modules"
+	"github.com/HungMingWu/Sia/types"
 	"gitlab.com/NebulousLabs/fastrand"
 )
 
@@ -66,7 +66,7 @@ func TestScanLargeIndex(t *testing.T) {
 	// create seed scanner and scan the block
 	seed, _, _ := wt.wallet.PrimarySeed()
 	ss := newSeedScanner(seed, wt.wallet.log)
-	err = ss.scan(wt.cs, wt.wallet.tg.StopChan())
+	err = ss.scan(wt.wallet.tg.StopChan(), wt.cs)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -125,7 +125,7 @@ func TestScanLoop(t *testing.T) {
 	// create seed scanner and scan the block
 	seed, _, _ := wt.wallet.PrimarySeed()
 	ss := newSeedScanner(seed, wt.wallet.log)
-	err = ss.scan(wt.cs, wt.wallet.tg.StopChan())
+	err = ss.scan(wt.wallet.tg.StopChan(), wt.cs)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -6,8 +6,8 @@ import (
 	"net/url"
 	"strconv"
 
-	"gitlab.com/NebulousLabs/Sia/node/api"
-	"gitlab.com/NebulousLabs/Sia/types"
+	"github.com/HungMingWu/Sia/node/api"
+	"github.com/HungMingWu/Sia/types"
 )
 
 // WalletAddressGet requests a new address from the /wallet/address endpoint

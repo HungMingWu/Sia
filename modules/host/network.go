@@ -19,10 +19,10 @@ import (
 	"sync/atomic"
 	"time"
 
-	"gitlab.com/NebulousLabs/Sia/build"
-	"gitlab.com/NebulousLabs/Sia/encoding"
-	"gitlab.com/NebulousLabs/Sia/modules"
-	"gitlab.com/NebulousLabs/Sia/types"
+	"github.com/HungMingWu/Sia/build"
+	"github.com/HungMingWu/Sia/encoding"
+	"github.com/HungMingWu/Sia/modules"
+	"github.com/HungMingWu/Sia/types"
 )
 
 // rpcSettingsDeprecated is a specifier for a deprecated settings request.
@@ -41,7 +41,7 @@ func (h *Host) threadedUpdateHostname(closeChan chan struct{}) {
 		// pointing to the wrong address is a minute of perceived downtime to
 		// the renters.
 		select {
-		case <-h.tg.StopChan():
+		case <-h.tg.StopChan().Done():
 			return
 		case <-time.After(time.Minute * 30):
 			continue
@@ -59,7 +59,7 @@ func (h *Host) threadedTrackWorkingStatus(closeChan chan struct{}) {
 	// that the host is working.
 	prevSettingsCalls := atomic.LoadUint64(&h.atomicSettingsCalls)
 	select {
-	case <-h.tg.StopChan():
+	case <-h.tg.StopChan().Done():
 		return
 	case <-time.After(workingStatusFirstCheck):
 	}
@@ -81,7 +81,7 @@ func (h *Host) threadedTrackWorkingStatus(closeChan chan struct{}) {
 	for {
 		prevSettingsCalls = atomic.LoadUint64(&h.atomicSettingsCalls)
 		select {
-		case <-h.tg.StopChan():
+		case <-h.tg.StopChan().Done():
 			return
 		case <-time.After(workingStatusFrequency):
 		}
@@ -111,7 +111,7 @@ func (h *Host) threadedTrackConnectabilityStatus(closeChan chan struct{}) {
 	// Wait briefly before checking the first time. This gives time for any port
 	// forwarding to complete.
 	select {
-	case <-h.tg.StopChan():
+	case <-h.tg.StopChan().Done():
 		return
 	case <-time.After(connectabilityCheckFirstWait):
 	}
@@ -127,11 +127,9 @@ func (h *Host) threadedTrackConnectabilityStatus(closeChan chan struct{}) {
 			activeAddr = userAddr
 		}
 
-		dialer := &net.Dialer{
-			Cancel:  h.tg.StopChan(),
+		conn, err := (&net.Dialer{
 			Timeout: connectabilityCheckTimeout,
-		}
-		conn, err := dialer.Dial("tcp", string(activeAddr))
+		}).DialContext(h.tg.StopChan(), "tcp", string(activeAddr))
 
 		var status modules.HostConnectabilityStatus
 		if err != nil {
@@ -145,7 +143,7 @@ func (h *Host) threadedTrackConnectabilityStatus(closeChan chan struct{}) {
 		h.mu.Unlock()
 
 		select {
-		case <-h.tg.StopChan():
+		case <-h.tg.StopChan().Done():
 			return
 		case <-time.After(connectabilityCheckFrequency):
 		}
@@ -255,7 +253,7 @@ func (h *Host) threadedHandleConn(conn net.Conn) {
 	defer close(connCloseChan)
 	go func() {
 		select {
-		case <-h.tg.StopChan():
+		case <-h.tg.StopChan().Done():
 		case <-connCloseChan:
 		}
 		conn.Close()
@@ -323,7 +321,7 @@ func (h *Host) threadedListen(closeChan chan struct{}) {
 
 		// Soft-sleep to ratelimit the number of incoming connections.
 		select {
-		case <-h.tg.StopChan():
+		case <-h.tg.StopChan().Done():
 		case <-time.After(rpcRatelimit):
 		}
 	}

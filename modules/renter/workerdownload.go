@@ -27,7 +27,7 @@ func (w *worker) managedDownload(udc *unfinishedDownloadChunk) {
 
 	// Fetch the sector. If fetching the sector fails, the worker needs to be
 	// unregistered with the chunk.
-	d, err := w.renter.hostContractor.Downloader(w.contract.HostPublicKey, w.renter.tg.StopChan())
+	d, err := w.renter.hostContractor.Downloader(w.renter.tg.StopChan(), w.contract.HostPublicKey)
 	if err != nil {
 		w.renter.log.Debugln("worker failed to create downloader:", err)
 		udc.managedUnregisterWorker(w)
