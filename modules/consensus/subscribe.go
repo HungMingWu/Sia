@@ -14,15 +14,15 @@ import (
 
 // computeConsensusChange computes the consensus change from the change entry
 // at index 'i' in the change log. If i is out of bounds, an error is returned.
-func (cs *ConsensusSet) computeConsensusChange(tx *bolt.Tx, ce changeEntry) (modules.ConsensusChange, error) {
-	cc := modules.ConsensusChange{
+func (cs *ConsensusSet) computeConsensusChange(tx *bolt.Tx, ce changeEntry) (*modules.ConsensusChange, error) {
+	cc := &modules.ConsensusChange{
 		ID: ce.ID(),
 	}
 	for _, revertedBlockID := range ce.RevertedBlocks {
 		revertedBlock, err := getBlockMap(tx, revertedBlockID)
 		if err != nil {
 			cs.log.Critical("getBlockMap failed in computeConsensusChange:", err)
-			return modules.ConsensusChange{}, err
+			return nil, err
 		}
 
 		// Because the direction is 'revert', the order of the diffs needs to
@@ -58,7 +58,7 @@ func (cs *ConsensusSet) computeConsensusChange(tx *bolt.Tx, ce changeEntry) (mod
 		appliedBlock, err := getBlockMap(tx, appliedBlockID)
 		if err != nil {
 			cs.log.Critical("getBlockMap failed in computeConsensusChange:", err)
-			return modules.ConsensusChange{}, err
+			return nil, err
 		}
 
 		cc.AppliedBlocks = append(cc.AppliedBlocks, appliedBlock.Block)
@@ -107,7 +107,7 @@ func (cs *ConsensusSet) updateSubscribers(ce changeEntry) {
 		return
 	}
 	// Get the consensus change and send it to all subscribers.
-	var cc modules.ConsensusChange
+	var cc *modules.ConsensusChange
 	err := cs.db.View(func(tx *bolt.Tx) error {
 		// Compute the consensus change so it can be sent to subscribers.
 		var err error
@@ -119,7 +119,7 @@ func (cs *ConsensusSet) updateSubscribers(ce changeEntry) {
 		return
 	}
 	for _, subscriber := range cs.subscribers {
-		subscriber.ProcessConsensusChange(cc)
+		subscriber.ProcessConsensusChange(*cc)
 	}
 }
 
@@ -196,7 +196,7 @@ func (cs *ConsensusSet) managedInitializeSubscribe(cancel context.Context, subsc
 				if err != nil {
 					return err
 				}
-				subscriber.ProcessConsensusChange(cc)
+				subscriber.ProcessConsensusChange(*cc)
 				entry, exists = entry.NextEntry(tx)
 			}
 			return nil

@@ -207,7 +207,7 @@ func TestModuleDesync(t *testing.T) {
 			if err != nil {
 				return err
 			}
-			updates = append(updates, cc)
+			updates = append(updates, *cc)
 		}
 		return nil
 	})
