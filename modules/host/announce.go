@@ -84,12 +84,6 @@ func (h *Host) managedAnnounce(addr modules.NetAddress) (err error) {
 
 // Announce creates a host announcement transaction.
 func (h *Host) Announce() error {
-	err := h.tg.Add()
-	if err != nil {
-		return err
-	}
-	defer h.tg.Done()
-
 	// Grab the internal net address and internal auto address, and compare
 	// them.
 	h.mu.RLock()
@@ -99,7 +93,7 @@ func (h *Host) Announce() error {
 
 	// Check that we have at least one address to work with.
 	if userSet == "" && autoSet == "" {
-		return build.ExtendErr("cannot announce because address could not be determined", err)
+		return build.ExtendErr("cannot announce because address could not be determined", nil)
 	}
 
 	// Prefer using the userSet address, otherwise use the automatic address.
@@ -111,7 +105,7 @@ func (h *Host) Announce() error {
 	}
 
 	// Check that the address is sane, and that the address is also not local.
-	err = annAddr.IsStdValid()
+	err := annAddr.IsStdValid()
 	if err != nil {
 		return build.ExtendErr("announcement requested with bad net address", err)
 	}
