@@ -3,6 +3,7 @@ package contractor
 import (
 	"testing"
 	"time"
+	"context"
 
 	"github.com/HungMingWu/Sia/build"
 	"github.com/HungMingWu/Sia/crypto"
@@ -49,7 +50,7 @@ func TestIntegrationAutoRenew(t *testing.T) {
 	contract := c.Contracts()[0]
 
 	// revise the contract
-	editor, err := c.Editor(nil, contract.HostPublicKey)
+	editor, err := c.Editor(context.Background(), contract.HostPublicKey)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -121,7 +122,7 @@ func TestIntegrationRenewInvalidate(t *testing.T) {
 	contract := c.Contracts()[0]
 
 	// revise the contract
-	editor, err := c.Editor(nil, contract.HostPublicKey)
+	editor, err := c.Editor(context.Background(), contract.HostPublicKey)
 	if err != nil {
 		t.Fatal(err)
 	}

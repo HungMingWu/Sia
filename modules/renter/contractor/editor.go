@@ -116,7 +116,7 @@ func (he *hostEditor) Upload(data []byte) (_ crypto.Hash, err error) {
 
 // Editor returns a Editor object that can be used to upload, modify, and
 // delete sectors on a host.
-func (c *Contractor) Editor(ctx context.Context, pk types.SiaPublicKey) (_ Editor, err error) {
+func (c *Contractor) Editor(cancel context.Context, pk types.SiaPublicKey) (_ Editor, err error) {
 	c.mu.RLock()
 	id, gotID := c.pubKeysToContractID[string(pk.Key)]
 	cachedEditor, haveEditor := c.editors[id]
@@ -174,7 +174,7 @@ func (c *Contractor) Editor(ctx context.Context, pk types.SiaPublicKey) (_ Edito
 	}()
 
 	// Create the editor.
-	e, err := c.staticContracts.NewEditor(ctx, host, contract.ID, height, c.hdb)
+	e, err := c.staticContracts.NewEditor(cancel, host, contract.ID, height, c.hdb)
 	if err != nil {
 		return nil, err
 	}

@@ -186,7 +186,7 @@ func TestAllowanceSpending(t *testing.T) {
 	// allowance.
 	for i := 0; i < 15; i++ {
 		for _, contract := range c.Contracts() {
-			ed, err := c.Editor(nil, contract.HostPublicKey)
+			ed, err := c.Editor(context.Background(), contract.HostPublicKey)
 			if err != nil {
 				continue
 			}

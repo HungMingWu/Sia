@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
+	"context"
 
 	"github.com/HungMingWu/Sia/build"
 	"github.com/HungMingWu/Sia/crypto"
@@ -241,7 +242,7 @@ func TestIntegrationReviseContract(t *testing.T) {
 	}
 
 	// revise the contract
-	editor, err := c.Editor(nil, contract.HostPublicKey)
+	editor, err := c.Editor(context.Background(), contract.HostPublicKey)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -284,7 +285,7 @@ func TestIntegrationUploadDownload(t *testing.T) {
 	}
 
 	// revise the contract
-	editor, err := c.Editor(nil, contract.HostPublicKey)
+	editor, err := c.Editor(context.Background(), contract.HostPublicKey)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -344,7 +345,7 @@ func TestIntegrationRenew(t *testing.T) {
 	}
 
 	// revise the contract
-	editor, err := c.Editor(nil, contract.HostPublicKey)
+	editor, err := c.Editor(context.Background(), contract.HostPublicKey)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -412,7 +413,7 @@ func TestIntegrationRenew(t *testing.T) {
 	}
 
 	// revise the contract
-	editor, err = c.Editor(nil, contract.HostPublicKey)
+	editor, err = c.Editor(context.Background(), contract.HostPublicKey)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -548,13 +549,13 @@ func TestIntegrationEditorCaching(t *testing.T) {
 	}
 
 	// create an editor
-	d1, err := c.Editor(nil, contract.HostPublicKey)
+	d1, err := c.Editor(context.Background(), contract.HostPublicKey)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	// create another editor
-	d2, err := c.Editor(nil, contract.HostPublicKey)
+	d2, err := c.Editor(context.Background(), contract.HostPublicKey)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -576,7 +577,7 @@ func TestIntegrationEditorCaching(t *testing.T) {
 	}
 
 	// create another editor
-	d3, err := c.Editor(nil, contract.HostPublicKey)
+	d3, err := c.Editor(context.Background(), contract.HostPublicKey)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -598,7 +599,7 @@ func TestIntegrationEditorCaching(t *testing.T) {
 	}
 
 	// create another editor
-	d4, err := c.Editor(nil, contract.HostPublicKey)
+	d4, err := c.Editor(context.Background(), contract.HostPublicKey)
 	if err != nil {
 		t.Fatal(err)
 	}
