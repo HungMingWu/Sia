@@ -121,16 +121,11 @@ func (h *Host) Announce() error {
 // specific address. If there is no error, the host's address will be updated
 // to the supplied address.
 func (h *Host) AnnounceAddress(addr modules.NetAddress) error {
-	err := h.tg.Add()
-	if err != nil {
-		return err
-	}
-	defer h.tg.Done()
 
 	// Check that the address is sane, and that the address is also not local.
-	err = addr.IsStdValid()
+	err := addr.IsStdValid()
 	if err != nil {
-		return build.ExtendErr("announcement requested with bad net address", err)
+		return build.ExtendErr("announcement requested with bad net address", nil)
 	}
 	if addr.IsLocal() {
 		return errors.New("announcement requested with local net address")
