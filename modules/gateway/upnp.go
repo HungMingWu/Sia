@@ -90,7 +90,7 @@ func (g *Gateway) threadedLearnHostname() {
 	}
 
 	for {
-		host, err := g.managedLearnHostname(nil)
+		host, err := g.managedLearnHostname(context.Background())
 		if err != nil {
 			g.log.Println("WARN: failed to discover external IP:", err)
 		}
