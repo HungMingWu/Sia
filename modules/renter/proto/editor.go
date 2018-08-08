@@ -31,7 +31,7 @@ type Editor struct {
 	contractID  types.FileContractID
 	contractSet *ContractSet
 	conn        net.Conn
-	closeChan   chan struct{}
+	closeChan   context.CancelFunc
 	deps        modules.Dependencies
 	hdb         hostDB
 	host        modules.HostDBEntry
@@ -47,7 +47,7 @@ func (he *Editor) shutdown() {
 	// don't care about these errors
 	_, _ = verifySettings(he.conn, he.host)
 	_ = modules.WriteNegotiationStop(he.conn)
-	close(he.closeChan)
+	he.closeChan()
 }
 
 // Close cleanly terminates the revision loop with the host and closes the
@@ -227,7 +227,7 @@ func (cs *ContractSet) NewEditor(cancel context.Context, host modules.HostDBEntr
 
 // initiateRevisionLoop initiates either the editor or downloader loop with
 // host, depending on which rpc was passed.
-func initiateRevisionLoop(cancel context.Context, host modules.HostDBEntry, contract contractHeader, rpc types.Specifier, rl *ratelimit.RateLimit) (net.Conn, chan struct{}, error) {
+func initiateRevisionLoop(cancel context.Context, host modules.HostDBEntry, contract contractHeader, rpc types.Specifier, rl *ratelimit.RateLimit) (net.Conn, context.CancelFunc, error) {
 	c, err := (&net.Dialer{
 		Timeout: 45 * time.Second, // TODO: Constant
 	}).DialContext(cancel, "tcp", string(host.NetAddress))
@@ -236,12 +236,12 @@ func initiateRevisionLoop(cancel context.Context, host modules.HostDBEntry, cont
 	}
 	conn := ratelimit.NewRLConn(cancel, c, rl)
 
-	closeChan := make(chan struct{})
+	ctx, cancelFunc := context.WithCancel(context.Background())
 	go func() {
 		select {
 		case <-cancel.Done():
 			conn.Close()
-		case <-closeChan:
+		case <-ctx.Done():
 		}
 	}()
 
@@ -250,13 +250,13 @@ func initiateRevisionLoop(cancel context.Context, host modules.HostDBEntry, cont
 	defer extendDeadline(conn, time.Hour)
 	if err := encoding.WriteObject(conn, rpc); err != nil {
 		conn.Close()
-		close(closeChan)
-		return nil, closeChan, errors.New("couldn't initiate RPC: " + err.Error())
+		cancelFunc()
+		return nil, cancelFunc, errors.New("couldn't initiate RPC: " + err.Error())
 	}
 	if err := verifyRecentRevision(conn, contract, host.Version); err != nil {
 		conn.Close() // TODO: close gracefully if host has entered revision loop
-		close(closeChan)
-		return nil, closeChan, err
+		cancelFunc()
+		return nil, cancelFunc, err
 	}
-	return conn, closeChan, nil
+	return conn, cancelFunc, nil
 }

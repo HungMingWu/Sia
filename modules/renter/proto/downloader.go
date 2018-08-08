@@ -17,7 +17,7 @@ import (
 // A Downloader retrieves sectors by calling the download RPC on a host.
 // Downloaders are NOT thread- safe; calls to Sector must be serialized.
 type Downloader struct {
-	closeChan   chan struct{}
+	closeChan   context.CancelFunc
 	conn        net.Conn
 	contractID  types.FileContractID
 	contractSet *ContractSet
@@ -144,7 +144,7 @@ func (hd *Downloader) shutdown() {
 	// don't care about these errors
 	_, _ = verifySettings(hd.conn, hd.host)
 	_ = modules.WriteNegotiationStop(hd.conn)
-	close(hd.closeChan)
+	hd.closeChan()
 }
 
 // Close cleanly terminates the download loop with the host and closes the
@@ -182,11 +182,11 @@ func (cs *ContractSet) NewDownloader(cancel context.Context, host modules.HostDB
 		}
 	}()
 
-	conn, closeChan, err := initiateRevisionLoop(cancel, host, contract, modules.RPCDownload, cs.rl)
+	conn, cancelFunc, err := initiateRevisionLoop(cancel, host, contract, modules.RPCDownload, cs.rl)
 	if IsRevisionMismatch(err) && len(sc.unappliedTxns) > 0 {
 		// we have desynced from the host. If we have unapplied updates from the
 		// WAL, try applying them.
-		conn, closeChan, err = initiateRevisionLoop(cancel, host, sc.unappliedHeader(), modules.RPCDownload, cs.rl)
+		conn, cancelFunc, err = initiateRevisionLoop(cancel, host, sc.unappliedHeader(), modules.RPCDownload, cs.rl)
 		if err != nil {
 			return nil, err
 		}
@@ -209,7 +209,7 @@ func (cs *ContractSet) NewDownloader(cancel context.Context, host modules.HostDB
 		contractSet: cs,
 		host:        host,
 		conn:        conn,
-		closeChan:   closeChan,
+		closeChan:   cancelFunc,
 		deps:        cs.deps,
 		hdb:         hdb,
 	}, nil
