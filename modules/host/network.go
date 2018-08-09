@@ -18,6 +18,7 @@ import (
 	"net"
 	"sync/atomic"
 	"time"
+	"context"
 
 	"github.com/HungMingWu/Sia/build"
 	"github.com/HungMingWu/Sia/encoding"
@@ -159,7 +160,7 @@ func (h *Host) initNetworking(address string) (err error) {
 		return err
 	}
 	// Automatically close the listener when h.tg.Stop() is called.
-	threadedListenerClosedChan := make(chan struct{})
+	threadedListenerClosedChan, cancel := context.WithCancel(context.Background())
 	h.tg.OnStop(func() {
 		err := h.listener.Close()
 		if err != nil {
@@ -167,7 +168,7 @@ func (h *Host) initNetworking(address string) (err error) {
 		}
 
 		// Wait until the threadedListener has returned to continue shutdown.
-		<-threadedListenerClosedChan
+		<-threadedListenerClosedChan.Done()
 	})
 
 	// Set the initial working state of the host
@@ -234,7 +235,7 @@ func (h *Host) initNetworking(address string) (err error) {
 	}()
 
 	// Launch the listener.
-	go h.threadedListen(threadedListenerClosedChan)
+	go h.threadedListen(cancel)
 	return nil
 }
 
@@ -305,8 +306,8 @@ func (h *Host) threadedHandleConn(conn net.Conn) {
 }
 
 // listen listens for incoming RPCs and spawns an appropriate handler for each.
-func (h *Host) threadedListen(closeChan chan struct{}) {
-	defer close(closeChan)
+func (h *Host) threadedListen(closeChan context.CancelFunc) {
+	defer closeChan()
 
 	// Receive connections until an error is returned by the listener. When an
 	// error is returned, there will be no more calls to receive.
