@@ -53,11 +53,11 @@ type (
 )
 
 // appendChangeLog adds a new change entry to the change log.
-func appendChangeLog(tx *bolt.Tx, ce changeEntry) error {
+func appendChangeLog(tx *bolt.Tx, ce *changeEntry) error {
 	// Insert the change entry.
 	cl := tx.Bucket(ChangeLog)
 	ceid := ce.ID()
-	cn := changeNode{Entry: ce, Next: modules.ConsensusChangeID{}}
+	cn := changeNode{Entry: *ce, Next: modules.ConsensusChangeID{}}
 	err := cl.Put(ceid[:], encoding.Marshal(cn))
 	if err != nil {
 		return err

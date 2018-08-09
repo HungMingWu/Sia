@@ -146,16 +146,17 @@ func (cs *ConsensusSet) validateHeader(tx dbTx, h types.BlockHeader) error {
 // on the block. Such errors are handled outside of the transaction by the
 // caller. Switching to a managed tx through bolt will make this complexity
 // unneeded.
-func (cs *ConsensusSet) addBlockToTree(tx *bolt.Tx, b types.Block, parent *processedBlock) (ce changeEntry, err error) {
+func (cs *ConsensusSet) addBlockToTree(tx *bolt.Tx, b types.Block, parent *processedBlock) (ce *changeEntry, err error) {
 	// Prepare the child processed block associated with the parent block.
 	newNode := cs.newChild(tx, parent, b)
+	ce = &changeEntry{};
 
 	// Check whether the new node is part of a chain that is heavier than the
 	// current node. If not, return ErrNonExtending and don't fork the
 	// blockchain.
 	currentNode := currentProcessedBlock(tx)
 	if !newNode.heavierThan(currentNode) {
-		return changeEntry{}, modules.ErrNonExtendingBlock
+		return nil, modules.ErrNonExtendingBlock
 	}
 
 	// Fork the blockchain and put the new heaviest block at the tip of the
@@ -163,7 +164,7 @@ func (cs *ConsensusSet) addBlockToTree(tx *bolt.Tx, b types.Block, parent *proce
 	var revertedBlocks, appliedBlocks []*processedBlock
 	revertedBlocks, appliedBlocks, err = cs.forkBlockchain(tx, newNode)
 	if err != nil {
-		return changeEntry{}, err
+		return nil, err
 	}
 	for _, rn := range revertedBlocks {
 		ce.RevertedBlocks = append(ce.RevertedBlocks, rn.Block.ID())
@@ -173,7 +174,7 @@ func (cs *ConsensusSet) addBlockToTree(tx *bolt.Tx, b types.Block, parent *proce
 	}
 	err = appendChangeLog(tx, ce)
 	if err != nil {
-		return changeEntry{}, err
+		return nil, err
 	}
 	return ce, nil
 }
@@ -259,7 +260,7 @@ func (cs *ConsensusSet) managedAcceptBlocks(blocks []types.Block) (blockchainExt
 			// Try adding the block to consensus.
 			changeEntry, err := cs.addBlockToTree(tx, blocks[i], parent)
 			if err == nil {
-				changes = append(changes, changeEntry)
+				changes = append(changes, *changeEntry)
 				chainExtended = true
 				var applied, reverted []string
 				for _, b := range changeEntry.AppliedBlocks {
