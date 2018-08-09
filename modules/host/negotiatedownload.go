@@ -124,7 +124,7 @@ func (h *Host) managedDownloadIteration(conn net.Conn, so *storageObligation) er
 		TransactionSignatures: []types.TransactionSignature{renterSignature, txn.TransactionSignatures[1]},
 	}}
 	h.mu.Lock()
-	err = h.modifyStorageObligation(*so, nil, nil, nil)
+	err = h.modifyStorageObligation(so, nil, nil, nil)
 	h.mu.Unlock()
 	if err != nil {
 		return extendErr("failed to modify storage obligation: ", ErrorInternal(modules.WriteNegotiationRejection(conn, err).Error()))
@@ -265,7 +265,7 @@ func (h *Host) managedRPCDownload(conn net.Conn) error {
 	// Perform a loop that will allow downloads to happen until the maximum
 	// time for a single connection has been reached.
 	for time.Now().Before(startTime.Add(iteratedConnectionTime)) {
-		err := h.managedDownloadIteration(conn, &so)
+		err := h.managedDownloadIteration(conn, so)
 		if err == modules.ErrStopResponse {
 			// The renter has indicated that it has finished downloading the
 			// data, therefore there is no error. Return nil.

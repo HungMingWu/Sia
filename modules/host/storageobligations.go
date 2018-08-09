@@ -168,21 +168,21 @@ func (i storageObligationStatus) String() string {
 }
 
 // getStorageObligation fetches a storage obligation from the database tx.
-func getStorageObligation(tx *bolt.Tx, soid types.FileContractID) (so storageObligation, err error) {
+func getStorageObligation(tx *bolt.Tx, soid types.FileContractID) (so *storageObligation, err error) {
 	soBytes := tx.Bucket(bucketStorageObligations).Get(soid[:])
 	if soBytes == nil {
-		return storageObligation{}, errNoStorageObligation
+		return nil, errNoStorageObligation
 	}
-	err = json.Unmarshal(soBytes, &so)
+	err = json.Unmarshal(soBytes, so)
 	if err != nil {
-		return storageObligation{}, err
+		return nil, err
 	}
 	return so, nil
 }
 
 // putStorageObligation places a storage obligation into the database,
 // overwriting the existing storage obligation if there is one.
-func putStorageObligation(tx *bolt.Tx, so storageObligation) error {
+func putStorageObligation(tx *bolt.Tx, so *storageObligation) error {
 	soBytes, err := json.Marshal(so)
 	if err != nil {
 		return err
@@ -331,7 +331,7 @@ func (h *Host) queueActionItem(height types.BlockHeight, id types.FileContractID
 // which means that addStorageObligation should be exclusively called when
 // creating a new, empty file contract or when renewing an existing file
 // contract.
-func (h *Host) managedAddStorageObligation(so storageObligation) error {
+func (h *Host) managedAddStorageObligation(so *storageObligation) error {
 	var soid types.FileContractID
 	err := func() error {
 		h.mu.Lock()
@@ -445,7 +445,7 @@ func (h *Host) managedAddStorageObligation(so storageObligation) error {
 // sectors will be removed the number of times that they are listed, to remove
 // multiple instances of the same virtual sector, the virtural sector will need
 // to appear in 'sectorsRemoved' multiple times. Same with 'sectorsGained'.
-func (h *Host) modifyStorageObligation(so storageObligation, sectorsRemoved []crypto.Hash, sectorsGained []crypto.Hash, gainedSectorData [][]byte) error {
+func (h *Host) modifyStorageObligation(so *storageObligation, sectorsRemoved []crypto.Hash, sectorsGained []crypto.Hash, gainedSectorData [][]byte) error {
 	// Sanity check - obligation should be under lock while being modified.
 	soid := so.id()
 	_, exists := h.lockedStorageObligations[soid]
@@ -496,7 +496,7 @@ func (h *Host) modifyStorageObligation(so storageObligation, sectorsRemoved []cr
 		return err
 	}
 	// Update the database to contain the new storage obligation.
-	var oldSO storageObligation
+	var oldSO *storageObligation
 	err = h.db.Update(func(tx *bolt.Tx) error {
 		// Get the old storage obligation as a reference to know how to upate
 		// the host financial stats.
@@ -550,7 +550,7 @@ func (h *Host) modifyStorageObligation(so storageObligation, sectorsRemoved []cr
 
 // removeStorageObligation will remove a storage obligation from the host,
 // either due to failure or success.
-func (h *Host) removeStorageObligation(so storageObligation, sos storageObligationStatus) error {
+func (h *Host) removeStorageObligation(so *storageObligation, sos storageObligationStatus) error {
 	// Error is not checked, we want to call remove on every sector even if
 	// there are problems - disk health information will be updated.
 	_ = h.RemoveSectorBatch(so.SectorRoots)
@@ -640,7 +640,7 @@ func (h *Host) threadedHandleActionItem(soid types.FileContractID) {
 	}()
 
 	// Fetch the storage obligation associated with the storage obligation id.
-	var so storageObligation
+	var so *storageObligation
 	h.mu.RLock()
 	blockHeight := h.blockHeight
 	err = h.db.View(func(tx *bolt.Tx) error {

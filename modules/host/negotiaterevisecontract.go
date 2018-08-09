@@ -167,7 +167,7 @@ func (h *Host) managedRevisionIteration(conn net.Conn, so *storageObligation, fi
 	so.PotentialUploadRevenue = so.PotentialUploadRevenue.Add(bandwidthRevenue)
 	so.RevisionTransactionSet = []types.Transaction{txn}
 	h.mu.Lock()
-	err = h.modifyStorageObligation(*so, sectorsRemoved, sectorsGained, gainedSectorData)
+	err = h.modifyStorageObligation(so, sectorsRemoved, sectorsGained, gainedSectorData)
 	h.mu.Unlock()
 	if err != nil {
 		modules.WriteNegotiationRejection(conn, err) // Error is ignored so that the error type can be preserved in extendErr.
@@ -215,7 +215,7 @@ func (h *Host) managedRPCReviseContract(conn net.Conn) error {
 	// timeout is reached, or until the renter sends a StopResponse.
 	for timeoutReached := false; !timeoutReached; {
 		timeoutReached = time.Since(startTime) > iteratedConnectionTime
-		err := h.managedRevisionIteration(conn, &so, timeoutReached)
+		err := h.managedRevisionIteration(conn, so, timeoutReached)
 		if err == modules.ErrStopResponse {
 			return nil
 		} else if err != nil {
