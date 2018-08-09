@@ -203,7 +203,7 @@ func TestModuleDesync(t *testing.T) {
 		entry := cst.cs.genesisEntry()
 		exists := true
 		for ; exists; entry, exists = entry.NextEntry(tx) {
-			cc, err := cst.cs.computeConsensusChange(tx, entry)
+			cc, err := cst.cs.computeConsensusChange(tx, &entry)
 			if err != nil {
 				return err
 			}

@@ -240,7 +240,7 @@ func (cs *ConsensusSet) managedAcceptBlocks(blocks []types.Block) (blockchainExt
 	// Verify the headers for every block, throw out known blocks, and the
 	// invalid blocks (which includes the children of invalid blocks).
 	chainExtended := false
-	changes := make([]changeEntry, 0, len(blocks))
+	changes := make([]*changeEntry, 0, len(blocks))
 	setErr := cs.db.Update(func(tx *bolt.Tx) error {
 		for i := 0; i < len(blocks); i++ {
 			// Start by checking the header of the block.
@@ -260,7 +260,7 @@ func (cs *ConsensusSet) managedAcceptBlocks(blocks []types.Block) (blockchainExt
 			// Try adding the block to consensus.
 			changeEntry, err := cs.addBlockToTree(tx, blocks[i], parent)
 			if err == nil {
-				changes = append(changes, *changeEntry)
+				changes = append(changes, changeEntry)
 				chainExtended = true
 				var applied, reverted []string
 				for _, b := range changeEntry.AppliedBlocks {

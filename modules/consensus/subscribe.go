@@ -14,7 +14,7 @@ import (
 
 // computeConsensusChange computes the consensus change from the change entry
 // at index 'i' in the change log. If i is out of bounds, an error is returned.
-func (cs *ConsensusSet) computeConsensusChange(tx *bolt.Tx, ce changeEntry) (*modules.ConsensusChange, error) {
+func (cs *ConsensusSet) computeConsensusChange(tx *bolt.Tx, ce *changeEntry) (*modules.ConsensusChange, error) {
 	cc := &modules.ConsensusChange{
 		ID: ce.ID(),
 	}
@@ -102,7 +102,7 @@ func (cs *ConsensusSet) computeConsensusChange(tx *bolt.Tx, ce changeEntry) (*mo
 // updateSubscribers will inform all subscribers of a new update to the
 // consensus set. updateSubscribers does not alter the changelog, the changelog
 // must be updated beforehand.
-func (cs *ConsensusSet) updateSubscribers(ce changeEntry) {
+func (cs *ConsensusSet) updateSubscribers(ce *changeEntry) {
 	if len(cs.subscribers) == 0 {
 		return
 	}
@@ -192,7 +192,7 @@ func (cs *ConsensusSet) managedInitializeSubscribe(cancel context.Context, subsc
 					return siasync.ErrStopped
 				default:
 				}
-				cc, err := cs.computeConsensusChange(tx, entry)
+				cc, err := cs.computeConsensusChange(tx, &entry)
 				if err != nil {
 					return err
 				}
