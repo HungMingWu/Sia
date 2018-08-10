@@ -176,7 +176,7 @@ func NewCustomConsensusSet(gateway modules.Gateway, bootstrap bool, persistDir s
 		gateway.RegisterRPC("SendBlocks", cs.rpcSendBlocks)
 		gateway.RegisterRPC("RelayHeader", cs.threadedRPCRelayHeader)
 		gateway.RegisterRPC("SendBlk", cs.rpcSendBlk)
-		gateway.RegisterConnectCall("SendBlocks", cs.threadedReceiveBlocks)
+		gateway.RegisterConnectCall("SendBlocks", cs.managedReceiveBlocks)
 		cs.tg.OnStop(func() {
 			cs.gateway.UnregisterRPC("SendBlocks")
 			cs.gateway.UnregisterRPC("RelayHeader")

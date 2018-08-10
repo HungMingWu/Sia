@@ -295,7 +295,7 @@ func TestSendBlocksBroadcastsOnce(t *testing.T) {
 				t.Fatal(err)
 			}
 		}
-		err = cst1.cs.gateway.RPC(cst2.cs.gateway.Address(), "SendBlocks", cst1.cs.threadedReceiveBlocks)
+		err = cst1.cs.gateway.RPC(cst2.cs.gateway.Address(), "SendBlocks", cst1.cs.managedReceiveBlocks)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -486,7 +486,7 @@ func TestIntegrationRPCSendBlocks(t *testing.T) {
 		localCurrentBlockID := localCST.cs.CurrentBlock().ID()
 		remoteCurrentBlockID := remoteCST.cs.CurrentBlock().ID()
 
-		err = localCST.cs.gateway.RPC(remoteCST.cs.gateway.Address(), "SendBlocks", localCST.cs.threadedReceiveBlocks)
+		err = localCST.cs.gateway.RPC(remoteCST.cs.gateway.Address(), "SendBlocks", localCST.cs.managedReceiveBlocks)
 		if err != nil {
 			t.Errorf("test #%d, %v: %v", i, tt.msg, err)
 		}
@@ -1357,7 +1357,7 @@ func (err mockNetError) Temporary() bool {
 	return err.temporary
 }
 
-// TestThreadedReceiveBlocksStalls tests that threadedReceiveBlocks returns
+// TestThreadedReceiveBlocksStalls tests that managedReceiveBlocks returns
 // errSendBlocksStalled when the connection times out before a block is
 // received.
 func TestThreadedReceiveBlocksStalls(t *testing.T) {
@@ -1411,47 +1411,47 @@ func TestThreadedReceiveBlocksStalls(t *testing.T) {
 		writeErr: errors.New("mock write err"),
 	}
 
-	// Test that threadedReceiveBlocks errors with errSendBlocksStalled when 0
+	// Test that managedReceiveBlocks errors with errSendBlocksStalled when 0
 	// blocks have been sent and the conn times out.
-	err = cst.cs.threadedReceiveBlocks(writeTimeoutConn)
+	err = cst.cs.managedReceiveBlocks(writeTimeoutConn)
 	if err != errSendBlocksStalled {
-		t.Errorf("expected threadedReceiveBlocks to err with \"%v\", got \"%v\"", errSendBlocksStalled, err)
+		t.Errorf("expected managedReceiveBlocks to err with \"%v\", got \"%v\"", errSendBlocksStalled, err)
 	}
 	errChan := make(chan error)
 	go func() {
 		var knownBlocks [32]types.BlockID
 		errChan <- encoding.ReadObject(p1, &knownBlocks, 32*crypto.HashSize)
 	}()
-	err = cst.cs.threadedReceiveBlocks(readTimeoutConn)
+	err = cst.cs.managedReceiveBlocks(readTimeoutConn)
 	if err != errSendBlocksStalled {
-		t.Errorf("expected threadedReceiveBlocks to err with \"%v\", got \"%v\"", errSendBlocksStalled, err)
+		t.Errorf("expected managedReceiveBlocks to err with \"%v\", got \"%v\"", errSendBlocksStalled, err)
 	}
 	err = <-errChan
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	// Test that threadedReceiveBlocks errors when writing the block history fails.
+	// Test that managedReceiveBlocks errors when writing the block history fails.
 	// Test with an error of type net.Error.
-	err = cst.cs.threadedReceiveBlocks(writeNetErrConn)
+	err = cst.cs.managedReceiveBlocks(writeNetErrConn)
 	if err != writeNetErrConn.writeErr {
-		t.Errorf("expected threadedReceiveBlocks to err with \"%v\", got \"%v\"", writeNetErrConn.writeErr, err)
+		t.Errorf("expected managedReceiveBlocks to err with \"%v\", got \"%v\"", writeNetErrConn.writeErr, err)
 	}
 	// Test with an error of type error.
-	err = cst.cs.threadedReceiveBlocks(writeErrConn)
+	err = cst.cs.managedReceiveBlocks(writeErrConn)
 	if err != writeErrConn.writeErr {
-		t.Errorf("expected threadedReceiveBlocks to err with \"%v\", got \"%v\"", writeErrConn.writeErr, err)
+		t.Errorf("expected managedReceiveBlocks to err with \"%v\", got \"%v\"", writeErrConn.writeErr, err)
 	}
 
-	// Test that threadedReceiveBlocks errors when reading blocks fails.
+	// Test that managedReceiveBlocks errors when reading blocks fails.
 	// Test with an error of type net.Error.
 	go func() {
 		var knownBlocks [32]types.BlockID
 		errChan <- encoding.ReadObject(p1, &knownBlocks, 32*crypto.HashSize)
 	}()
-	err = cst.cs.threadedReceiveBlocks(readNetErrConn)
+	err = cst.cs.managedReceiveBlocks(readNetErrConn)
 	if err != readNetErrConn.readErr {
-		t.Errorf("expected threadedReceiveBlocks to err with \"%v\", got \"%v\"", readNetErrConn.readErr, err)
+		t.Errorf("expected managedReceiveBlocks to err with \"%v\", got \"%v\"", readNetErrConn.readErr, err)
 	}
 	err = <-errChan
 	if err != nil {
@@ -1462,18 +1462,18 @@ func TestThreadedReceiveBlocksStalls(t *testing.T) {
 		var knownBlocks [32]types.BlockID
 		errChan <- encoding.ReadObject(p1, &knownBlocks, 32*crypto.HashSize)
 	}()
-	err = cst.cs.threadedReceiveBlocks(readErrConn)
+	err = cst.cs.managedReceiveBlocks(readErrConn)
 	if err != readErrConn.readErr {
-		t.Errorf("expected threadedReceiveBlocks to err with \"%v\", got \"%v\"", readErrConn.readErr, err)
+		t.Errorf("expected tmanagedReceiveBlockso err with \"%v\", got \"%v\"", readErrConn.readErr, err)
 	}
 	err = <-errChan
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	// TODO: Test that threadedReceiveBlocks doesn't error with a timeout if it has received one block before this timed out read/write.
+	// TODO: Test that managedReceiveBlocksdoesn't error with a timeout if it has received one block before this timed out read/write.
 
-	// TODO: Test that threadedReceiveBlocks doesn't error with errSendBlocksStalled if it successfully received one block.
+	// TODO: Test that managedReceiveBlocks doesn't error with errSendBlocksStalled if it successfully received one block.
 }
 
 // TestIntegrationSendBlocksStalls tests that the SendBlocks RPC fails with
@@ -1500,7 +1500,7 @@ func TestIntegrationSendBlocksStalls(t *testing.T) {
 	// Lock the remote CST so that SendBlocks blocks and timesout.
 	cstRemote.cs.mu.Lock()
 	defer cstRemote.cs.mu.Unlock()
-	err = cstLocal.cs.gateway.RPC(cstRemote.cs.gateway.Address(), "SendBlocks", cstLocal.cs.threadedReceiveBlocks)
+	err = cstLocal.cs.gateway.RPC(cstRemote.cs.gateway.Address(), "SendBlocks", cstLocal.cs.managedReceiveBlocks)
 	if err != errSendBlocksStalled {
 		t.Fatal(err)
 	}

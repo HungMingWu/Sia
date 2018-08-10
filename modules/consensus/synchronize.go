@@ -236,29 +236,6 @@ func (cs *ConsensusSet) managedReceiveBlocks(conn modules.PeerConn) (returnErr e
 	return nil
 }
 
-// threadedReceiveBlocks is the calling end of the SendBlocks RPC.
-func (cs *ConsensusSet) threadedReceiveBlocks(conn modules.PeerConn) error {
-	err := conn.SetDeadline(time.Now().Add(sendBlocksTimeout))
-	if err != nil {
-		return err
-	}
-	finishedChan := make(chan struct{})
-	defer close(finishedChan)
-	go func() {
-		select {
-		case <-cs.tg.StopChan().Done():
-		case <-finishedChan:
-		}
-		conn.Close()
-	}()
-	err = cs.tg.Add()
-	if err != nil {
-		return err
-	}
-	defer cs.tg.Done()
-	return cs.managedReceiveBlocks(conn)
-}
-
 // rpcSendBlocks is the receiving end of the SendBlocks RPC. It returns a
 // sequential set of blocks based on the 32 input block IDs. The most recent
 // known ID is used as the starting point, and up to 'MaxCatchUpBlocks' from
